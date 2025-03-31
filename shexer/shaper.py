@@ -63,7 +63,8 @@ class Shaper(object):
                  detect_minimal_iri=False,
                  allow_redundant_or=False,
                  instances_cap=-1,
-                 examples_mode=None
+                 examples_mode=None,
+                 federated_pairs=None
                  ):
         """
 
@@ -111,6 +112,7 @@ class Shaper(object):
         :param allow_redundant_or:
         :param instances_cap:
         :param examples_mode:
+        :param federated_pairs
         """
 
         check_just_one_not_none((graph_file_input, "graph_file_input"),
@@ -182,6 +184,7 @@ class Shaper(object):
         self._inverse_paths = inverse_paths
         self._detect_minimal_iri = detect_minimal_iri
         self._examples_mode = examples_mode
+        self._federated_pairs = federated_pairs
 
         self._compression_mode = compression_mode
 
