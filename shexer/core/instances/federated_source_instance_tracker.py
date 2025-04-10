@@ -23,7 +23,9 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
     def track_instances(self, verbose=False):
         self._instances_dict_federated = self._build_fed_instances_dict()
-        return self._integrate_dicts()
+        return self._integrate_dicts()  # TODO here: no! return just the origin one. Integrate the new instances in the fed_source_obj.
+                                        # those objects and seprated lists should be received by the class profiler independently, so it can
+                                        # know where to look for instance info. 
 
     def _integrate_dicts(self):
         for a_key in self._instances_dict_federated:
