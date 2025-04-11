@@ -13,6 +13,7 @@ class FederatedSource(object):
         self._link_in_federated_source = link_in_federated_source
         self._alias = alias
         self._origin_position_in_triple = origin_position_in_triple
+        self._set_of_instances = None  # It will be filled whn tracking instances
 
 
     @property
@@ -31,4 +32,11 @@ class FederatedSource(object):
     def alias(self):
         return self._alias
 
+    @property
+    def set_of_instances(self):
+        return self._instances_dict
+
+    @set_of_instances.setter
+    def set_of_instances(self, a_dict):
+        self._instances_dict = a_dict
 

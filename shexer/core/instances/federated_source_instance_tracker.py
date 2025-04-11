@@ -23,9 +23,10 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
     def track_instances(self, verbose=False):
         self._instances_dict_federated = self._build_fed_instances_dict()
-        return self._integrate_dicts()  # TODO here: no! return just the origin one. Integrate the new instances in the fed_source_obj.
-                                        # those objects and seprated lists should be received by the class profiler independently, so it can
-                                        # know where to look for instance info. 
+        self._integrate_dicts()
+        self._federated_source_obj.set_of_instances = set(self._instances_dict_federated.keys())
+        self._instances_dict_federated = None  # Free memory
+        return self._instances_dict_in_origin
 
     def _integrate_dicts(self):
         for a_key in self._instances_dict_federated:
@@ -35,10 +36,10 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
     def _build_fed_instances_dict(self):
         for an_instance, a_synonym in self._find_synonyms():
-            self._add_sinonym_to_dicts(origin_instance=an_instance,
+            self._add_synonym_to_dicts(origin_instance=an_instance,
                                        synonym=a_synonym)
 
-    def _add_sinonym_to_dicts(self, origin_instance, synonym):
+    def _add_synonym_to_dicts(self, origin_instance, synonym):
         shape_labels = [self._adapted_shape_class(a_class) for a_class in self._instances_dict_in_origin[origin_instance]]
         if synonym not in self._instances_dict_federated:
             self._instances_dict_federated[synonym] = []
@@ -64,7 +65,7 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         keys = self._instances_dict_in_origin.keys()
         for an_instance in keys:
             for a_synonym in self._query_remote_synonyms(target_instance=an_instance):
-                self._add_sinonym_to_dicts(origin_instance=an_instance,
+                self._add_synonym_to_dicts(origin_instance=an_instance,
                                            synonym=a_synonym)
     def _query_remote_synonyms(self):
         return query_endpoint_single_variable(endpoint_url=self._federated_source_obj.endpoint_url,
