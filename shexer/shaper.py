@@ -64,7 +64,7 @@ class Shaper(object):
                  allow_redundant_or=False,
                  instances_cap=-1,
                  examples_mode=None,
-                 federated_pairs=None
+                 federated_sources=None  # could be a list
                  ):
         """
 
@@ -112,7 +112,7 @@ class Shaper(object):
         :param allow_redundant_or:
         :param instances_cap:
         :param examples_mode:
-        :param federated_pairs
+        :param federated_sources
         """
 
         check_just_one_not_none((graph_file_input, "graph_file_input"),
@@ -184,7 +184,7 @@ class Shaper(object):
         self._inverse_paths = inverse_paths
         self._detect_minimal_iri = detect_minimal_iri
         self._examples_mode = examples_mode
-        self._federated_pairs = federated_pairs
+        self._federated_sources = federated_sources
 
         self._compression_mode = compression_mode
 
@@ -340,7 +340,7 @@ class Shaper(object):
                                 instances_report_mode=self._instances_report_mode,
                                 detect_minimal_iri=self._detect_minimal_iri,
                                 class_min_iris=self._class_min_iris,
-                                allow_redundant_or=self._allow_redundant_or,
+                                allow_redundant_or=self._allow_redundant_or
 
                                 )
 
@@ -389,7 +389,8 @@ class Shaper(object):
                                   compression_mode=self._compression_mode,
                                   disable_endpoint_cache=self._disable_endpoint_cache,
                                   detect_minimal_iri=self._detect_minimal_iri,
-                                  examples_mode=self._examples_mode)
+                                  examples_mode=self._examples_mode,
+                                  federated_sources=self._federated_sources) # TODO IMPL.
 
 
     def _build_instance_tracker(self):
@@ -423,7 +424,8 @@ class Shaper(object):
                                     inverse_paths=self._inverse_paths,
                                     compression_mode=self._compression_mode,
                                     disable_endpoint_cache=self._disable_endpoint_cache,
-                                    instances_cap=self._instances_cap)
+                                    instances_cap=self._instances_cap,
+                                    federates_sources= self._federated_sources) # TODO IMPL.
 
 
     @staticmethod

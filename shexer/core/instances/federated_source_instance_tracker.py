@@ -13,15 +13,18 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         self._instance_tracker = instance_tracker
         self._federated_source_obj = federated_source_obj
         self._instances_dict_federated = {}
-        self._instances_dict_in_origin = self._instance_tracker._instances_dict  # YES, let it be
-        self._origin_triple_yielder = self._instance_tracker._triple_yielder # YES, let it be
-
+        self._instances_dict_in_origin = None
+        self._origin_triple_yielder = None
         self._query_to_find_synonyms = None  # may be changed later
 
         # self._base_triple_yielder = self._build_base_triple_yielder()
 
 
     def track_instances(self, verbose=False):
+        # TODO We have to do here a loop, walking through, potentially, several instances of federated sources.
+        # Then, integrate all dicts into the origin_dict one.
+        self._instances_dict_in_origin = self._instance_tracker.track_instances()
+        self._origin_triple_yielder = self._instance_tracker._triple_yielder  # YES, let it be
         self._instances_dict_federated = self._build_fed_instances_dict()
         self._integrate_dicts()
         self._federated_source_obj.set_of_instances = set(self._instances_dict_federated.keys())
@@ -50,7 +53,7 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         return original_class + _FEDERATION_TAG_NAME + self._federated_source_obj.alias
 
 
-    def _find_synonims(self, an_instance):
+    def _find_synonyms(self, an_instance):
         if not self._federated_source_obj._link_in_federated_source:
             for an_instance_synonym_pair in self._find_synonims_in_origin():
                 yield an_instance_synonym_pair

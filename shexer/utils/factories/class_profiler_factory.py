@@ -30,7 +30,8 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                        compression_mode=None,
                        disable_endpoint_cache=None,
                        detect_minimal_iri=False,
-                       examples_mode=None):
+                       examples_mode=None,
+                       federated_sources=None):
     yielder = get_triple_yielder(source_file=source_file,
                                  list_of_source_files=list_of_source_files,
                                  input_format=input_format,
