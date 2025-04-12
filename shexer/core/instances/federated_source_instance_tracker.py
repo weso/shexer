@@ -21,7 +21,7 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         # TODO We have to do here a loop, walking through, potentially, several instances of federated sources.
         # Then, integrate all dicts into the origin_dict one.
         self._instances_dict_in_origin = self._instance_tracker.track_instances()
-        self._origin_triple_yielder = self._instance_tracker._triple_yielder  # YES, let it be
+        self._origin_triple_yielder = self._instance_tracker._triples_yielder  # YES, let it be
         for a_fed_source in self._federated_source_objs:
             instances_dict_federated = self._build_fed_instances_dict(a_fed_source)
             self._integrate_dicts(instances_dict_federated)
@@ -31,7 +31,6 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
     def _integrate_dicts(self, fed_source_dict):
         for a_key in fed_source_dict:
             self._instances_dict_in_origin[a_key] = fed_source_dict[a_key]
-        # return self._instances_dict_in_origin
 
     def _build_fed_instances_dict(self, a_fed_source):
         fed_source_dict = {}
@@ -47,8 +46,8 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
                                                   fed_source=a_fed_source) for a_class in self._instances_dict_in_origin[origin_instance]]
         if synonym not in fed_source_dict:
             fed_source_dict[synonym] = []
-            fed_source_dict[synonym].add(shape_labels)
-            fed_source_dict[origin_instance].add(shape_labels)
+        fed_source_dict[synonym].extend(shape_labels)
+        self._instances_dict_in_origin[origin_instance].extend(shape_labels)
 
     def _adapted_shape_label(self, original_class, fed_source):
         return original_class + _FEDERATION_TAG_NAME + fed_source.alias
@@ -62,7 +61,7 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
             for an_instance_synonym_pair in self._find_synonyms_in_fed_source(a_fed_source, fed_source_dict):
                 yield an_instance_synonym_pair
 
-    def _find_synonyms_in_fed_source(self, a_fed_source, fed_source_dict):
+    def _find_synonyms_in_fed_source(self, a_fed_source):
         self._query_to_find_synonyms = _QUERY_SYNONYMS_ORIGIN_SUBJECT \
             if a_fed_source.origin_position_in_triple == _S \
             else _QUERY_SYNONYMS_ORIGIN_OBJECT
@@ -74,7 +73,8 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
     def _query_remote_synonyms(self, target_instance, fed_source):
         return query_endpoint_single_variable(endpoint_url=fed_source.endpoint_url,
-                                              str_query=self._query_to_find_synonyms,
+                                              str_query=self._query_to_find_synonyms.format(origin_node=target_instance,
+                                                                                            synonym_prop=fed_source.property_link),
                                               variable_id=_VARIABLE_NAME_QUERYING_REMOTE_SYNONYMS)
 
     def _find_synonyms_in_origin(self, a_fed_source):
@@ -86,7 +86,7 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         instance_position = a_fed_source.origin_position_in_triple
         synonym_position = _S if a_fed_source.origin_position_in_triple == _O else _O
         for a_triple in self._origin_triple_yielder.yield_triples():
-            if a_triple[_P] == a_fed_source.property_link:
-                if a_triple[instance_position] in self._instances_dict_in_origin:
-                    yield a_triple[instance_position], a_triple[synonym_position]
+            if a_triple[_P].iri == a_fed_source.property_link:
+                if a_triple[instance_position].iri in self._instances_dict_in_origin:
+                    yield a_triple[instance_position].iri, a_triple[synonym_position].iri
 

@@ -35,6 +35,7 @@ class ClassProfiler(object):
         self._class_counts = {}  # Will be filled later
         self._detect_minimal_iri = detect_minimal_iri
         self._examples_mode = examples_mode
+        self._inverse_paths = inverse_paths
 
         self._original_target_nodes = determine_original_target_nodes_if_needed(remove_empty_shapes=remove_empty_shapes,
                                                                                 original_target_classes=original_target_classes,
