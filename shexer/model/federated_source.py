@@ -21,6 +21,10 @@ class FederatedSource(object):
         return self._endpoint_url
 
     @property
+    def origin_position_in_triple(self):
+        return self._origin_position_in_triple
+
+    @property
     def property_link(self):
         return self._property_link
 

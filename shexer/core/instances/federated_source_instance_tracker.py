@@ -9,15 +9,12 @@ _QUERY_SYNONYMS_ORIGIN_OBJECT = "select ?s where {{ ?var  <{synonym_prop}>  <{or
 
 class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
-    def __init__(self, instance_tracker, federated_source_obj):
+    def __init__(self, instance_tracker, federated_source_objs):
         self._instance_tracker = instance_tracker
-        self._federated_source_obj = federated_source_obj
-        self._instances_dict_federated = {}
+        self._federated_source_objs = federated_source_objs
         self._instances_dict_in_origin = None
         self._origin_triple_yielder = None
         self._query_to_find_synonyms = None  # may be changed later
-
-        # self._base_triple_yielder = self._build_base_triple_yielder()
 
 
     def track_instances(self, verbose=False):
@@ -25,66 +22,71 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         # Then, integrate all dicts into the origin_dict one.
         self._instances_dict_in_origin = self._instance_tracker.track_instances()
         self._origin_triple_yielder = self._instance_tracker._triple_yielder  # YES, let it be
-        self._instances_dict_federated = self._build_fed_instances_dict()
-        self._integrate_dicts()
-        self._federated_source_obj.set_of_instances = set(self._instances_dict_federated.keys())
-        self._instances_dict_federated = None  # Free memory
+        for a_fed_source in self._federated_source_objs:
+            instances_dict_federated = self._build_fed_instances_dict(a_fed_source)
+            self._integrate_dicts(instances_dict_federated)
+            a_fed_source.set_of_instances = set(instances_dict_federated.keys())
         return self._instances_dict_in_origin
 
-    def _integrate_dicts(self):
-        for a_key in self._instances_dict_federated:
-            self._instances_dict_in_origin[a_key] = self._instances_dict_federated[a_key]
-        self._instances_dict_federated = None  # Free memory
-        return self._instances_dict_in_origin
+    def _integrate_dicts(self, fed_source_dict):
+        for a_key in fed_source_dict:
+            self._instances_dict_in_origin[a_key] = fed_source_dict[a_key]
+        # return self._instances_dict_in_origin
 
-    def _build_fed_instances_dict(self):
-        for an_instance, a_synonym in self._find_synonyms():
+    def _build_fed_instances_dict(self, a_fed_source):
+        fed_source_dict = {}
+        for an_instance, a_synonym in self._find_synonyms(a_fed_source=a_fed_source, fed_source_dict=fed_source_dict):
             self._add_synonym_to_dicts(origin_instance=an_instance,
-                                       synonym=a_synonym)
+                                       synonym=a_synonym,
+                                       fed_source_dict=fed_source_dict,
+                                       a_fed_source=a_fed_source)
+        return fed_source_dict
 
-    def _add_synonym_to_dicts(self, origin_instance, synonym):
-        shape_labels = [self._adapted_shape_class(a_class) for a_class in self._instances_dict_in_origin[origin_instance]]
-        if synonym not in self._instances_dict_federated:
-            self._instances_dict_federated[synonym] = []
-            self._instances_dict_federated[synonym].add(shape_labels)
-            self._instances_dict_federated[origin_instance].add(shape_labels)
+    def _add_synonym_to_dicts(self, origin_instance, synonym, fed_source_dict, a_fed_source):
+        shape_labels = [self._adapted_shape_label(original_class=a_class,
+                                                  fed_source=a_fed_source) for a_class in self._instances_dict_in_origin[origin_instance]]
+        if synonym not in fed_source_dict:
+            fed_source_dict[synonym] = []
+            fed_source_dict[synonym].add(shape_labels)
+            fed_source_dict[origin_instance].add(shape_labels)
 
-    def _adapted_shape_label(self, original_class):
-        return original_class + _FEDERATION_TAG_NAME + self._federated_source_obj.alias
+    def _adapted_shape_label(self, original_class, fed_source):
+        return original_class + _FEDERATION_TAG_NAME + fed_source.alias
 
 
-    def _find_synonyms(self, an_instance):
-        if not self._federated_source_obj._link_in_federated_source:
-            for an_instance_synonym_pair in self._find_synonims_in_origin():
+    def _find_synonyms(self, a_fed_source, fed_source_dict):
+        if not a_fed_source.link_in_federated_source:
+            for an_instance_synonym_pair in self._find_synonyms_in_origin(a_fed_source):
                 yield an_instance_synonym_pair
         else:
-            for an_instance_synonym_pair in self._find_synonyms_in_fed_source():
+            for an_instance_synonym_pair in self._find_synonyms_in_fed_source(a_fed_source, fed_source_dict):
                 yield an_instance_synonym_pair
 
-    def _find_synonyms_in_fed_source(self):
+    def _find_synonyms_in_fed_source(self, a_fed_source, fed_source_dict):
         self._query_to_find_synonyms = _QUERY_SYNONYMS_ORIGIN_SUBJECT \
-            if self._federated_source_obj._origin_position_in_triple == _S \
+            if a_fed_source.origin_position_in_triple == _S \
             else _QUERY_SYNONYMS_ORIGIN_OBJECT
         keys = self._instances_dict_in_origin.keys()
         for an_instance in keys:
-            for a_synonym in self._query_remote_synonyms(target_instance=an_instance):
-                self._add_synonym_to_dicts(origin_instance=an_instance,
-                                           synonym=a_synonym)
-    def _query_remote_synonyms(self):
-        return query_endpoint_single_variable(endpoint_url=self._federated_source_obj.endpoint_url,
+            for a_synonym in self._query_remote_synonyms(target_instance=an_instance,
+                                                         fed_source=a_fed_source):
+                yield an_instance, a_synonym
+
+    def _query_remote_synonyms(self, target_instance, fed_source):
+        return query_endpoint_single_variable(endpoint_url=fed_source.endpoint_url,
                                               str_query=self._query_to_find_synonyms,
                                               variable_id=_VARIABLE_NAME_QUERYING_REMOTE_SYNONYMS)
 
-    def _find_synonyms_in_origin(self):
+    def _find_synonyms_in_origin(self, a_fed_source):
         """
         It yields 2-tuples where where:
         - 0, instance (origin source)
         - 1, synonym (federated source)
         """
-        instance_position = self._federated_source_obj._origin_position_in_triple
-        synonym_position = _S if self._federated_source_obj._origin_position_in_triple == _O else _O
-        for a_triple in self._triple_yielder.yield_triples():
-            if a_triple[_P] == self._federated_source_obj.property_link:
+        instance_position = a_fed_source.origin_position_in_triple
+        synonym_position = _S if a_fed_source.origin_position_in_triple == _O else _O
+        for a_triple in self._origin_triple_yielder.yield_triples():
+            if a_triple[_P] == a_fed_source.property_link:
                 if a_triple[instance_position] in self._instances_dict_in_origin:
-                    yield (a_triple[instance_position],a_triple[synonym_position])
+                    yield a_triple[instance_position], a_triple[synonym_position]
 

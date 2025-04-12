@@ -425,7 +425,7 @@ class Shaper(object):
                                     compression_mode=self._compression_mode,
                                     disable_endpoint_cache=self._disable_endpoint_cache,
                                     instances_cap=self._instances_cap,
-                                    federates_sources= self._federated_sources) # TODO IMPL.
+                                    federates_sources=self._federated_sources)
 
 
     @staticmethod
