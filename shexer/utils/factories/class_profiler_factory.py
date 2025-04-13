@@ -1,5 +1,6 @@
 from shexer.utils.factories.triple_yielders_factory import get_triple_yielder
 from shexer.core.profiling.class_profiler import ClassProfiler
+from shexer.core.profiling.federated_source_class_profiler import FederatedSourceClassProfiler
 from shexer.utils.target_elements import tune_target_classes_if_needed
 from shexer.utils.dict import reverse_keys_and_values
 
@@ -30,7 +31,8 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                        compression_mode=None,
                        disable_endpoint_cache=None,
                        detect_minimal_iri=False,
-                       examples_mode=None):
+                       examples_mode=None,
+                       federated_sources=None):
     yielder = get_triple_yielder(source_file=source_file,
                                  list_of_source_files=list_of_source_files,
                                  input_format=input_format,
@@ -58,16 +60,32 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                                  compression_mode=compression_mode,
                                  disable_endpoint_cache=disable_endpoint_cache)
 
-    return ClassProfiler(triples_yielder=yielder,
-                         instances_dict=target_classes_dict,
-                         instantiation_property_str=instantiation_property_str,
-                         original_target_classes=None
-                         if target_classes is None
-                         else tune_target_classes_if_needed(
-                             list_target_classes=target_classes,
-                             prefix_namespaces_dict=reverse_keys_and_values(namespaces_dict)),
-                         original_shape_map=built_shape_map,
-                         remove_empty_shapes=remove_empty_shapes,
-                         inverse_paths=inverse_paths,
-                         detect_minimal_iri=detect_minimal_iri,
-                         examples_mode=examples_mode)
+    if federated_sources is None or len(federated_sources) == 0:
+        return ClassProfiler(triples_yielder=yielder,
+                             instances_dict=target_classes_dict,
+                             instantiation_property_str=instantiation_property_str,
+                             original_target_classes=None
+                             if target_classes is None
+                             else tune_target_classes_if_needed(
+                                 list_target_classes=target_classes,
+                                 prefix_namespaces_dict=reverse_keys_and_values(namespaces_dict)),
+                             original_shape_map=built_shape_map,
+                             remove_empty_shapes=remove_empty_shapes,
+                             inverse_paths=inverse_paths,
+                             detect_minimal_iri=detect_minimal_iri,
+                             examples_mode=examples_mode)
+    else:
+        return FederatedSourceClassProfiler(triples_yielder=yielder,
+                                            instances_dict=target_classes_dict,
+                                            instantiation_property_str=instantiation_property_str,
+                                            original_target_classes=None
+                                            if target_classes is None
+                                            else tune_target_classes_if_needed(
+                                                list_target_classes=target_classes,
+                                                prefix_namespaces_dict=reverse_keys_and_values(namespaces_dict)),
+                                            original_shape_map=built_shape_map,
+                                            remove_empty_shapes=remove_empty_shapes,
+                                            inverse_paths=inverse_paths,
+                                            detect_minimal_iri=detect_minimal_iri,
+                                            examples_mode=examples_mode,
+                                            list_of_federated_objects=federated_sources)
