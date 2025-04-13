@@ -4,6 +4,8 @@ from shexer.consts import SHAPES_DEFAULT_NAMESPACE
 from shexer.core.profiling.consts import RDF_TYPE_STR
 from shexer.utils.log import log_msg
 from shexer.model.graph.endpoint_sgraph import EndpointSGraph
+from shexer.utils.triple_yielders import tune_token, tune_prop
+from shexer.core.instances.pconsts import _S, _P, _O
 
 class FederatedSourceClassProfiler(ClassProfiler):
 
@@ -86,7 +88,11 @@ class FederatedSourceClassProfiler(ClassProfiler):
         else:
             triples = self._direct_and_inverse_target_triples_of_fed_source(end_graph, fed_source)
         for a_triple in triples:
-            yield a_triple
+            yield (
+                tune_token(a_triple[_S]),
+                tune_prop(a_triple[_P]),
+                tune_token(a_triple[_O])
+            )
 
     def _direct_target_triples_of_fed_source(self, end_graph, fed_source):
         triples = set()
