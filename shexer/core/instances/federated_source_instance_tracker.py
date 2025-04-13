@@ -1,8 +1,7 @@
 from shexer.core.instances.abstract_instance_tracker import AbstractInstanceTracker
-from shexer.core.instances.pconsts import  _S, _P, _O
+from shexer.core.instances.pconsts import _S, _P, _O, FEDERATION_TAG_MARK
 from shexer.io.sparql.query import query_endpoint_single_variable
 
-_FEDERATION_TAG_NAME = "_fed_"
 _VARIABLE_NAME_QUERYING_REMOTE_SYNONYMS = "var"
 _QUERY_SYNONYMS_ORIGIN_SUBJECT = "select ?s where {{ <{origin_node}> <{synonym_prop}> ?var .  }}"
 _QUERY_SYNONYMS_ORIGIN_OBJECT = "select ?s where {{ ?var  <{synonym_prop}>  <{origin_node}> .  }}"
@@ -22,10 +21,14 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
         # Then, integrate all dicts into the origin_dict one.
         self._instances_dict_in_origin = self._instance_tracker.track_instances()
         self._origin_triple_yielder = self._instance_tracker._triples_yielder  # YES, let it be
+        fed_dicts = []
         for a_fed_source in self._federated_source_objs:
             instances_dict_federated = self._build_fed_instances_dict(a_fed_source)
-            self._integrate_dicts(instances_dict_federated)
+            # self._integrate_dicts(instances_dict_federated)
             a_fed_source.set_of_instances = set(instances_dict_federated.keys())
+            fed_dicts.append(instances_dict_federated)
+        for a_fed_dict in fed_dicts:
+            self._integrate_dicts(a_fed_dict)
         return self._instances_dict_in_origin
 
     def _integrate_dicts(self, fed_source_dict):
@@ -43,14 +46,14 @@ class FederatedSourceInstanceTracker(AbstractInstanceTracker):
 
     def _add_synonym_to_dicts(self, origin_instance, synonym, fed_source_dict, a_fed_source):
         shape_labels = [self._adapted_shape_label(original_class=a_class,
-                                                  fed_source=a_fed_source) for a_class in self._instances_dict_in_origin[origin_instance]]
+                                                  fed_source=a_fed_source) for a_class in self._instances_dict_in_origin[origin_instance] if FEDERATION_TAG_MARK not in a_class]
         if synonym not in fed_source_dict:
             fed_source_dict[synonym] = []
         fed_source_dict[synonym].extend(shape_labels)
         self._instances_dict_in_origin[origin_instance].extend(shape_labels)
 
     def _adapted_shape_label(self, original_class, fed_source):
-        return original_class + _FEDERATION_TAG_NAME + fed_source.alias
+        return original_class + FEDERATION_TAG_MARK + fed_source.alias
 
 
     def _find_synonyms(self, a_fed_source, fed_source_dict):

@@ -1,6 +1,9 @@
 from shexer.core.shexing.class_shexer import ClassShexer
 from shexer.consts import RDF_TYPE, SHAPES_DEFAULT_NAMESPACE
 from shexer.consts import RATIO_INSTANCES
+from shexer.core.instances.pconsts import FEDERATION_TAG_MARK
+
+_COMMENT_FED_PROPERTY = "# Constraint only observed in {}"
 
 class ClassShexerFedSources(ClassShexer):
 
@@ -23,5 +26,59 @@ class ClassShexerFedSources(ClassShexer):
 
     def shex_classes(self, acceptance_threshold=0,
                      verbose=False):
-        pass
+        result = super().shex_classes(acceptance_threshold=acceptance_threshold,
+                                      verbose=verbose)
+        self._annotate_properties_in_fed_shapes(result)
+        return result
+
+
+    def _annotate_properties_in_fed_shapes(self, list_of_shapes):
+        pairs = self._find_pairs_of_origin_and_fed_shape(list_of_shapes)
+        for a_origin_fed_pair in pairs:
+            self._annotate_fed_properties_of_a_shape(origin_shape=a_origin_fed_pair[0],
+                                                     fed_shape=a_origin_fed_pair[1])
+
+
+    def _annotate_fed_properties_of_a_shape(self, origin_shape, fed_shape):
+        fed_name_for_comments = fed_shape.class_uri[
+                                fed_shape.class_uri.find(FEDERATION_TAG_MARK)+len(FEDERATION_TAG_MARK):]
+        for a_fed_statement in fed_shape.direct_statements:
+            only_in_fed = True
+            for a_orig_statement in origin_shape.direct_statements:
+                if a_fed_statement.st_property == self._instantiation_property_str:
+                    if a_fed_statement.st_property == a_orig_statement.st_property and a_fed_statement.st_type == a_orig_statement.st_type:
+                        only_in_fed = False
+                        break
+                else:
+                    if a_fed_statement.st_property == a_orig_statement.st_property:
+                        only_in_fed = False
+                        break
+            if only_in_fed:
+                a_fed_statement.add_comment(_COMMENT_FED_PROPERTY.format(fed_name_for_comments))
+        # TODO: same thing with inverse. Probably refactor
+        for a_fed_statement in fed_shape.inverse_statements:
+            only_in_fed = False
+            for a_orig_statement in origin_shape.inverse_statements:
+                if a_fed_statement.st_property == self._instantiation_property:
+                    if a_fed_statement.st_property == a_orig_statement.st_property and a_fed_statement.st_type == a_orig_statement.st_type:
+                        only_in_fed = True
+                        break
+                else:
+                    if a_fed_statement.st_property == a_orig_statement.st_property:
+                        only_in_fed = True
+                        break
+            if only_in_fed:
+                a_fed_statement.add_comment(comment=_COMMENT_FED_PROPERTY.format(fed_name_for_comments),
+                                            insert_first=False)
+
+    def _find_pairs_of_origin_and_fed_shape(self, list_of_shapes):
+        result = []
+        for i in range(len(list_of_shapes)):
+            a_shape = list_of_shapes[i]
+            for a_potential_fed_shape in list_of_shapes[i+1:]:
+                if a_potential_fed_shape.class_uri.startswith(a_shape.class_uri) and \
+                        FEDERATION_TAG_MARK in a_potential_fed_shape.class_uri:
+                    result.append((a_shape, a_potential_fed_shape))
+        return result
+
 

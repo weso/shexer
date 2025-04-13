@@ -340,9 +340,8 @@ class Shaper(object):
                                 instances_report_mode=self._instances_report_mode,
                                 detect_minimal_iri=self._detect_minimal_iri,
                                 class_min_iris=self._class_min_iris,
-                                allow_redundant_or=self._allow_redundant_or
-
-                                )
+                                allow_redundant_or=self._allow_redundant_or,
+                                federated_sources=self._federated_sources)
 
     def _build_shapes_serializer(self, target_file, string_return, output_format):
         return get_shape_serializer(shapes_list=self._shape_list,
