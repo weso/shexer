@@ -67,6 +67,8 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Adaptation to Wikidata model**. sheXer includes configuration params to handle Wikidata's data model regarding qualifiers, so you can automatically extract the schema of qualifier nodes too. You can also produce content where each Wikidata ID is associated with  its label in comments, as sheXer is integrated with [wLighter](https://github.com/DaniFdezAlvarez/wLighter).
 
+* **Extraction of shapes for federation**. You can configure sheXer to extract information form several endpoints whose URIs are connected. sheXer will extract shapes combining information of both ends which can be helpful fro making federated queries.
+
 
 ## Experimental results
 
@@ -212,6 +214,7 @@ All this parameters have a default value so you do not need to use any of them. 
 * namespaces_for_qualifier_props (default None). Provide here a list of namespace in which the indirect properties used to link an entity with a qualifier node can be found. A reasonable configuration for Wikidata is namespaces_for_qualifier_props = \["http://www.wikidata.org/prop/"\] .
 * inverse_paths (default False). When it is set to True, sheXer will produce constraints with inverse_paths too. This is, constraints referring to triples in which the target node acst as object. Direct and inverse paths will be sorted in the final results w.r.t. their trutsworthiness score.
 * detect_minimal_iri (default False). When it is set to True, each shape will be associated with a regex pattern. That pattern expresses the initial part of the IRI that is common to every isntance used to extract a given shape. This pattern is only serialized when it is a "worthy" one (long enough, not just "http://", etc.).
+* federated_sources (default None). It expects to reveive a list of FederatedSource objects. Each one of those objects contains information about how to locate synonyms to URIs in the target source in an external endpoint, so sheXer can extract shapes for federation.
 
 
 #### Params to tune some features of the output
