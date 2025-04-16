@@ -246,7 +246,8 @@ class Shaper(object):
                    output_format=SHEXC,
                    acceptance_threshold=0,
                    verbose=False,
-                   to_uml_path=None):
+                   to_uml_path=None,
+                   rdfconfig_directory=None):
         """
         :param string_output:
         :param output_file:
@@ -279,6 +280,16 @@ class Shaper(object):
             except ResourceWarning as e:  # I think this is related to UMLPlant and I can't close the connection from here
                 pass
 
+        current_result = ""
+        if rdfconfig_directory is not None:
+            serializer = self._build_shapes_serializer(target_file=output_file,
+                                                       string_return=string_output,
+                                                       output_format=output_format,
+                                                       rdfconfig_directory=rdfconfig_directory)
+            current_result = serializer.serialize_shapes()
+        if current_result is None:
+            current_result = ""
+
         if string_output or output_file is not None:
             log_msg(verbose=verbose,
                     msg="Generating text serialization...")
@@ -286,7 +297,8 @@ class Shaper(object):
                                                        string_return=string_output,
                                                        output_format=output_format)
 
-            return serializer.serialize_shapes()  # If string return is active, returns string.
+            return current_result + serializer.serialize_shapes()  # If string return is active, returns string.
+
 
 
     def _generate_uml_diagram(self, to_uml_path):
@@ -343,7 +355,7 @@ class Shaper(object):
                                 allow_redundant_or=self._allow_redundant_or,
                                 federated_sources=self._federated_sources)
 
-    def _build_shapes_serializer(self, target_file, string_return, output_format):
+    def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory=None):
         return get_shape_serializer(shapes_list=self._shape_list,
                                     target_file=target_file,
                                     string_return=string_return,
@@ -356,7 +368,9 @@ class Shaper(object):
                                     detect_minimal_iri=self._detect_minimal_iri,
                                     shape_features_examples=self._class_min_iris,
                                     examples_mode=self._examples_mode,
-                                    inverse_paths=self._inverse_paths)
+                                    inverse_paths=self._inverse_paths,
+                                    rdfconfig_directory=rdfconfig_directory,
+                                    endpoint_url=self._url_endpoint)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,
