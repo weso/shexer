@@ -29,7 +29,9 @@ class RdfConfigSerializer(object):
         self._endpoint_file = self._generate_proper_path(_ENDPOINT_FILE_NAME)
         self._endpoint_url = endpoint_url
 
-        self._variables_dict = {}
+        self._subjects_dict = {}
+        self._variables_used = set()
+        self._shape_names_used = set()
         self._shapes_stream = None  # It will be initialized later, io_stream to write shapes
 
     def serialize_shapes(self):
@@ -52,18 +54,48 @@ class RdfConfigSerializer(object):
             self._serialize_constraint(shape=shape,
                                        constraint=a_constraint)
 
-    def _shape_subject_name(self, shape_name):
-        if shape_name not in self._variables_dict:
-            self._variables_dict[shape_name] = shape_name  # TODO improve
-        return self._variables_dict[shape_name]
 
-    def _variable_property_name(self, property):
-        if property not in self._variables_dict:
-            self._variables_dict[property] = property  # TODO improve
-        return self._variables_dict[property]
+    def _variable_property_name(self, st_property):
+        original = self._create_var_name_for_property(st_property)  # TODO improve
+        candidate = original
+        counter = 1
+        while candidate in self._variables_used:
+            counter +=1
+            candidate = original + str(counter)
+        self._variables_used.add(candidate)
+        return candidate
+
+    def _create_var_name_for_property(self, st_property):
+        st_property.replace("_","")
+        st_property.replace("-", "")
+        for i in range(len(st_property) - 1, -1, -1):
+            if not st_property[i].isalnum():
+                return st_property[i+1:]
+        return "varName"
+
+    def _create_subject_name_for_shape(self, shape_uri):
+        shape_uri.replace("_","")
+        shape_uri.replace("-", "")
+        for i in range(len(shape_uri) - 1, -1, -1):
+            if not shape_uri[i].isalnum():
+                return "shape" + shape_uri[i+1:].capitalize()
+        return "varName"
+
+    def _shape_subject_name(self, shape_uri):
+        if shape_uri not in self._subjects_dict:
+            origin = self._create_subject_name_for_shape(shape_uri)
+            candidate = origin
+            counter = 1
+            while candidate in self._shape_names_used:
+                counter += 1
+                candidate = origin + str(counter)
+            self._shape_names_used.add(candidate)
+            self._subjects_dict[shape_uri] = candidate
+        return self._subjects_dict[shape_uri]
+
 
     def _write_shape_line(self, content, indentation):
-        indentation_str = '\t' * indentation
+        indentation_str = ' ' * 2 * indentation
         self._shapes_stream.write(f"{indentation_str}- {content}\n")
 
     def _serialize_shape_header(self, shape):
@@ -75,17 +107,15 @@ class RdfConfigSerializer(object):
             shape_example = prefixize_uri_if_possible(target_uri=shape_example,
                                                       namespaces_prefix_dict=self._namespaces_dict,
                                                       corners=True)
-        self._write_shape_line(content=f"{self._shape_subject_name(shape.name)} {shape_example}:",
+        self._write_shape_line(content=f"{self._shape_subject_name(shape.class_uri)} {shape_example}:",
                                indentation=_SHAPE_INDENT_LEVEL)
 
     def _serialize_constraint(self, shape, constraint):
+        st_property = self._nice_uri(constraint.st_property)
         if constraint.st_property == self._instantiation_property_str:
-            st_type = f"<{constraint.st_type}>"
-            st_type = prefixize_uri_if_possible(target_uri=st_type,
-                                                namespaces_prefix_dict=self._namespaces_dict,
-                                                corners=True)
+            st_type = self._nice_uri(constraint.st_type)
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
-                                   content=f"{constraint.st_property}: {st_type}")
+                                   content=f"{st_property}: {st_type}")
         else:
             if self._inverse_paths:
                 example_cons = self._shape_example_features.get_constraint_example(shape_id=shape.class_uri,
@@ -97,14 +127,11 @@ class RdfConfigSerializer(object):
             if example_cons is None:
                 example_cons = ""
             elif example_cons.startswith("http://") or example_cons.startswith("https://"):
-                example_cons = f"<{example_cons}>"
-                example_cons = prefixize_uri_if_possible(target_uri=example_cons,
-                                                         namespaces_prefix_dict=self._namespaces_dict,
-                                                         corners=True)
+                example_cons = self._nice_uri(example_cons)
             elif not example_cons.isnumeric():
                 example_cons = f'"{example_cons}"'
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
-                                   content=f"{constraint.st_property}:")
+                                   content=f"{st_property}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,
                                    content=f"{self._variable_property_name(constraint.st_property)}: {example_cons}")  # todo improve
 
@@ -135,3 +162,10 @@ class RdfConfigSerializer(object):
     def _create_dir_if_necessary(self):
         if not os.path.exists(self._target_directory):
             os.makedirs(self._target_directory)
+
+    def _nice_uri(self, target_uri):
+        result = f"<{target_uri}>"
+        return prefixize_uri_if_possible(target_uri=result,
+                                         namespaces_prefix_dict=self._namespaces_dict,
+                                         corners=True)
+
