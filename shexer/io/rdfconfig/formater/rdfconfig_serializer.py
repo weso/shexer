@@ -1,6 +1,7 @@
 from shexer.core.profiling.class_profiler import RDF_TYPE_STR
 from shexer.utils.file import load_whole_file_content
 from shexer.utils.uri import prefixize_uri_if_possible
+from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 import os
 
 _MODEL_FILE_NAME = "model.yaml"
@@ -107,7 +108,7 @@ class RdfConfigSerializer(object):
             shape_example = prefixize_uri_if_possible(target_uri=shape_example,
                                                       namespaces_prefix_dict=self._namespaces_dict,
                                                       corners=True)
-        self._write_shape_line(content=f"{self._shape_subject_name(shape.class_uri)} {shape_example}:",
+        self._write_shape_line(content=f"{self._shape_subject_name(shape.name[2:-1])} {shape_example}:",
                                indentation=_SHAPE_INDENT_LEVEL)
 
     def _serialize_constraint(self, shape, constraint):
@@ -124,7 +125,9 @@ class RdfConfigSerializer(object):
             else:
                 example_cons = self._shape_example_features.get_constraint_example(shape_id=shape.class_uri,
                                                                                    prop=constraint.st_property)
-            if example_cons is None:
+            if constraint.st_type.startswith(STARTING_CHAR_FOR_SHAPE_NAME):
+                example_cons = self._shape_subject_name(constraint.st_type[2:-1])
+            elif example_cons is None:
                 example_cons = ""
             elif example_cons.startswith("http://") or example_cons.startswith("https://"):
                 example_cons = self._nice_uri(example_cons)
@@ -133,7 +136,7 @@ class RdfConfigSerializer(object):
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
                                    content=f"{st_property}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,
-                                   content=f"{self._variable_property_name(constraint.st_property)}: {example_cons}")  # todo improve
+                                   content=f"{self._variable_property_name(constraint.st_property)}: {example_cons}")
 
     def _serialize_prefixes(self):
         with open(self._prefixes_file, "w") as out_stream:
@@ -141,8 +144,9 @@ class RdfConfigSerializer(object):
                 out_stream.write(f"{a_prefix}: <{a_namespace}>\n")
 
     def _serialize_endpoint(self):
-        with open(self._endpoint_file, "w") as out_stream:
-            out_stream.write(f"endpoint: {self._endpoint_url}")
+        if self._endpoint_url is not None:
+            with open(self._endpoint_file, "w") as out_stream:
+                out_stream.write(f"endpoint: {self._endpoint_url}")
 
     def _generate_proper_path(self, file_name):
         return self._target_directory + (
@@ -150,7 +154,7 @@ class RdfConfigSerializer(object):
 
     def _compose_output_files_in_str(self):
         return f"{self._header(_ENDPOINT_FILE_NAME)}\n" \
-               f"{load_whole_file_content(self._endpoint_file)}\n" \
+               f"{load_whole_file_content(self._endpoint_file) if self._endpoint_url is not None else 'Endpoint not provided'}\n" \
                f"{self._header(_PREFIX_FILE_NAME)}\n" \
                f"{load_whole_file_content(self._prefixes_file)}\n" \
                f"{self._header(_PREFIX_FILE_NAME)}\n" \
