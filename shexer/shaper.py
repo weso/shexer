@@ -197,9 +197,6 @@ class Shaper(object):
         self._namespaces_for_qualifier_props = namespaces_for_qualifier_props
         self._shapes_namespace = shapes_namespace
 
-        self._add_shapes_namespaces_to_namespaces_dict()
-
-
         #The following two atts are used for optimizations
         self._built_remote_graph = get_remote_graph_if_needed(endpoint_url=url_endpoint,
                                                               store_locally=not disable_endpoint_cache)
@@ -257,9 +254,10 @@ class Shaper(object):
         :param to_uml_path:
         :return:
         """
-        self._check_correct_output_params(string_output, output_file, to_uml_path)
+        self._check_correct_output_params(string_output, output_file, to_uml_path, rdfconfig_directory)
         self._check_output_format(output_format)
         self._check_aceptance_threshold(acceptance_threshold)
+        self._add_shapes_namespaces_to_namespaces_dict(rdfconfig_directory)
         if self._target_classes_dict is None:
             self._launch_instance_tracker(verbose=verbose)
         if self._profile is None:
@@ -310,9 +308,10 @@ class Shaper(object):
 
 
 
-    def _add_shapes_namespaces_to_namespaces_dict(self):
+    def _add_shapes_namespaces_to_namespaces_dict(self, rdfconfig_directory):
         self._namespaces_dict[self._shapes_namespace] = \
-            find_adequate_prefix_for_shapes_namespaces(self._namespaces_dict)
+            find_adequate_prefix_for_shapes_namespaces(self._namespaces_dict,
+                                                       avoid_empty=False if rdfconfig_directory is None else True)
 
     def _launch_class_profiler(self, verbose=False):
         if self._class_profiler is None:
@@ -442,9 +441,10 @@ class Shaper(object):
 
 
     @staticmethod
-    def _check_correct_output_params(string_output, target_file, to_uml_path):
-        if not string_output and target_file is None and to_uml_path is None:
-            raise ValueError("You must provide a target path , set string output to True and/or give a value to to_uml_path")
+    def _check_correct_output_params(string_output, target_file, to_uml_path, rdfconfig_directory):
+        if not string_output and target_file is None and to_uml_path is None and rdfconfig_directory is None:
+            raise ValueError("You must provide a target path, set string output to True, "
+                             "provide a value to to_uml_path and/or provide a value to rdfconfig_directory")
 
     @staticmethod
     def _check_input_format(input_format):
@@ -454,7 +454,7 @@ class Shaper(object):
     @staticmethod
     def _check_compression_mode(compression_mode, url_endpoint, url_graph_input, list_of_url_input):
         if compression_mode not in [ZIP, GZ, XZ, None]:
-            raise ValueError("Unknownk compression mode: {}. "
+            raise ValueError("Unknown compression mode: {}. "
                              "The currently supported compression formats are {}.".format(
                 compression_mode,
                 ", ".join([ZIP, GZ, XZ])))

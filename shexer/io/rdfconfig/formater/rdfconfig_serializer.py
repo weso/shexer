@@ -68,19 +68,19 @@ class RdfConfigSerializer(object):
 
     def _create_var_name_for_property(self, st_property):
         st_property.replace("_","")
-        st_property.replace("-", "")
+        st_property=st_property.lower()
         for i in range(len(st_property) - 1, -1, -1):
             if not st_property[i].isalnum():
                 return st_property[i+1:]
-        return "varName"
+        return "var_name"
 
     def _create_subject_name_for_shape(self, shape_uri):
         shape_uri.replace("_","")
         shape_uri.replace("-", "")
         for i in range(len(shape_uri) - 1, -1, -1):
             if not shape_uri[i].isalnum():
-                return "shape" + shape_uri[i+1:].capitalize()
-        return "varName"
+                return "Shape" + shape_uri[i+1:].capitalize()
+        return "SubjectName"
 
     def _shape_subject_name(self, shape_uri):
         if shape_uri not in self._subjects_dict:
@@ -146,7 +146,7 @@ class RdfConfigSerializer(object):
     def _serialize_endpoint(self):
         if self._endpoint_url is not None:
             with open(self._endpoint_file, "w") as out_stream:
-                out_stream.write(f"endpoint: {self._endpoint_url}")
+                out_stream.write(f"endpoint:\n  - {self._endpoint_url}")
 
     def _generate_proper_path(self, file_name):
         return self._target_directory + (
