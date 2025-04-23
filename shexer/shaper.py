@@ -294,8 +294,9 @@ class Shaper(object):
             serializer = self._build_shapes_serializer(target_file=output_file,
                                                        string_return=string_output,
                                                        output_format=output_format)
-
-            return current_result + serializer.serialize_shapes()  # If string return is active, returns string.
+            res = serializer.serialize_shapes()
+            if string_output:
+                return current_result + res  # If string return is active, returns string.
 
 
 
