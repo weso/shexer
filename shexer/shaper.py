@@ -63,7 +63,8 @@ class Shaper(object):
                  detect_minimal_iri=False,
                  allow_redundant_or=False,
                  instances_cap=-1,
-                 examples_mode=None
+                 examples_mode=None,
+                 federated_sources=None  # could be a list
                  ):
         """
 
@@ -111,6 +112,7 @@ class Shaper(object):
         :param allow_redundant_or:
         :param instances_cap:
         :param examples_mode:
+        :param federated_sources
         """
 
         check_just_one_not_none((graph_file_input, "graph_file_input"),
@@ -182,6 +184,7 @@ class Shaper(object):
         self._inverse_paths = inverse_paths
         self._detect_minimal_iri = detect_minimal_iri
         self._examples_mode = examples_mode
+        self._federated_sources = federated_sources
 
         self._compression_mode = compression_mode
 
@@ -193,9 +196,6 @@ class Shaper(object):
         self._shape_qualifiers_mode = shape_qualifiers_mode
         self._namespaces_for_qualifier_props = namespaces_for_qualifier_props
         self._shapes_namespace = shapes_namespace
-
-        self._add_shapes_namespaces_to_namespaces_dict()
-
 
         #The following two atts are used for optimizations
         self._built_remote_graph = get_remote_graph_if_needed(endpoint_url=url_endpoint,
@@ -243,7 +243,8 @@ class Shaper(object):
                    output_format=SHEXC,
                    acceptance_threshold=0,
                    verbose=False,
-                   to_uml_path=None):
+                   to_uml_path=None,
+                   rdfconfig_directory=None):
         """
         :param string_output:
         :param output_file:
@@ -253,9 +254,10 @@ class Shaper(object):
         :param to_uml_path:
         :return:
         """
-        self._check_correct_output_params(string_output, output_file, to_uml_path)
+        self._check_correct_output_params(string_output, output_file, to_uml_path, rdfconfig_directory)
         self._check_output_format(output_format)
         self._check_aceptance_threshold(acceptance_threshold)
+        self._add_shapes_namespaces_to_namespaces_dict(rdfconfig_directory)
         if self._target_classes_dict is None:
             self._launch_instance_tracker(verbose=verbose)
         if self._profile is None:
@@ -276,6 +278,16 @@ class Shaper(object):
             except ResourceWarning as e:  # I think this is related to UMLPlant and I can't close the connection from here
                 pass
 
+        current_result = ""
+        if rdfconfig_directory is not None:
+            serializer = self._build_shapes_serializer(target_file=output_file,
+                                                       string_return=string_output,
+                                                       output_format=output_format,
+                                                       rdfconfig_directory=rdfconfig_directory)
+            current_result = serializer.serialize_shapes()
+        if current_result is None:
+            current_result = ""
+
         if string_output or output_file is not None:
             log_msg(verbose=verbose,
                     msg="Generating text serialization...")
@@ -283,7 +295,8 @@ class Shaper(object):
                                                        string_return=string_output,
                                                        output_format=output_format)
 
-            return serializer.serialize_shapes()  # If string return is active, returns string.
+            return current_result + serializer.serialize_shapes()  # If string return is active, returns string.
+
 
 
     def _generate_uml_diagram(self, to_uml_path):
@@ -295,9 +308,10 @@ class Shaper(object):
 
 
 
-    def _add_shapes_namespaces_to_namespaces_dict(self):
+    def _add_shapes_namespaces_to_namespaces_dict(self, rdfconfig_directory):
         self._namespaces_dict[self._shapes_namespace] = \
-            find_adequate_prefix_for_shapes_namespaces(self._namespaces_dict)
+            find_adequate_prefix_for_shapes_namespaces(self._namespaces_dict,
+                                                       avoid_empty=False if rdfconfig_directory is None else True)
 
     def _launch_class_profiler(self, verbose=False):
         if self._class_profiler is None:
@@ -338,10 +352,9 @@ class Shaper(object):
                                 detect_minimal_iri=self._detect_minimal_iri,
                                 class_min_iris=self._class_min_iris,
                                 allow_redundant_or=self._allow_redundant_or,
+                                federated_sources=self._federated_sources)
 
-                                )
-
-    def _build_shapes_serializer(self, target_file, string_return, output_format):
+    def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory=None):
         return get_shape_serializer(shapes_list=self._shape_list,
                                     target_file=target_file,
                                     string_return=string_return,
@@ -354,7 +367,9 @@ class Shaper(object):
                                     detect_minimal_iri=self._detect_minimal_iri,
                                     shape_features_examples=self._class_min_iris,
                                     examples_mode=self._examples_mode,
-                                    inverse_paths=self._inverse_paths)
+                                    inverse_paths=self._inverse_paths,
+                                    rdfconfig_directory=rdfconfig_directory,
+                                    endpoint_url=self._url_endpoint)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,
@@ -386,7 +401,8 @@ class Shaper(object):
                                   compression_mode=self._compression_mode,
                                   disable_endpoint_cache=self._disable_endpoint_cache,
                                   detect_minimal_iri=self._detect_minimal_iri,
-                                  examples_mode=self._examples_mode)
+                                  examples_mode=self._examples_mode,
+                                  federated_sources=self._federated_sources) # TODO IMPL.
 
 
     def _build_instance_tracker(self):
@@ -420,13 +436,15 @@ class Shaper(object):
                                     inverse_paths=self._inverse_paths,
                                     compression_mode=self._compression_mode,
                                     disable_endpoint_cache=self._disable_endpoint_cache,
-                                    instances_cap=self._instances_cap)
+                                    instances_cap=self._instances_cap,
+                                    federates_sources=self._federated_sources)
 
 
     @staticmethod
-    def _check_correct_output_params(string_output, target_file, to_uml_path):
-        if not string_output and target_file is None and to_uml_path is None:
-            raise ValueError("You must provide a target path , set string output to True and/or give a value to to_uml_path")
+    def _check_correct_output_params(string_output, target_file, to_uml_path, rdfconfig_directory):
+        if not string_output and target_file is None and to_uml_path is None and rdfconfig_directory is None:
+            raise ValueError("You must provide a target path, set string output to True, "
+                             "provide a value to to_uml_path and/or provide a value to rdfconfig_directory")
 
     @staticmethod
     def _check_input_format(input_format):
@@ -436,7 +454,7 @@ class Shaper(object):
     @staticmethod
     def _check_compression_mode(compression_mode, url_endpoint, url_graph_input, list_of_url_input):
         if compression_mode not in [ZIP, GZ, XZ, None]:
-            raise ValueError("Unknownk compression mode: {}. "
+            raise ValueError("Unknown compression mode: {}. "
                              "The currently supported compression formats are {}.".format(
                 compression_mode,
                 ", ".join([ZIP, GZ, XZ])))

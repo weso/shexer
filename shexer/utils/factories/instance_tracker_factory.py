@@ -9,6 +9,7 @@ from shexer.utils.factories.shape_map_parser_factory import get_shape_map_parser
 from shexer.model.graph.endpoint_sgraph import EndpointSGraph
 from shexer.model.graph.rdflib_sgraph import RdflibSgraph
 from shexer.utils.dict import reverse_keys_and_values
+from shexer.core.instances.federated_source_instance_tracker import FederatedSourceInstanceTracker
 
 
 def get_instance_tracker(instances_file_input=None, graph_file_input=None,
@@ -39,7 +40,8 @@ def get_instance_tracker(instances_file_input=None, graph_file_input=None,
                          inverse_paths=False,
                          compression_mode=None,
                          disable_endpoint_cache=False,
-                         instances_cap=-1
+                         instances_cap=-1,
+                         federates_sources=None
                          ):
     """
 
@@ -168,7 +170,11 @@ def get_instance_tracker(instances_file_input=None, graph_file_input=None,
                                                  shapes_namespace=shapes_namespace,
                                                  instances_cap=instances_cap)
 
-    return _decide_tracker_to_return(selectors_tracker, pure_instances_tracker)
+    candidate_tracker = _decide_tracker_to_return(selectors_tracker, pure_instances_tracker)
+    if federates_sources is None or len(federates_sources) == 0:
+        return candidate_tracker
+    return FederatedSourceInstanceTracker(instance_tracker=candidate_tracker,
+                                          federated_source_objs=federates_sources)
 
 
 def _get_adequate_sgraph(endpoint_url, graph_file_input, url_input, graph_format,
