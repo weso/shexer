@@ -39,7 +39,9 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Valid ShEx and SHACL**. The produced shapes are compilant with the current specification of ShEx2 and SHACL.
 
-* **UML**. Ypu can also generate UML-like views of the extracted schemas.
+* **UML**. You can also generate UML-like views of the extracted schemas.
+
+* **rdf-config generation**. You can generate rdf-config YAML files as well. Check uses of this technology at the [rdf-config repository](https://github.com/dbcls/rdf-config).
 
 * **Threshold of tolerance**. The constraints inferred for each shape may not be compatible with every node associated to the shapes. With this threshold you can indicate the minimun percentage of nodes that should conform with a constraint c. If c does not reach the indicated ratio, its associated information will not appear in the final shape.
 
@@ -239,5 +241,6 @@ The method __shex\_graph__  of shexer triggers all the inference process and giv
 * aceptance_threshold (default 0): Given a certain inferred constraint __c__ for a shape __s__, the ammount of instances which conform to this constraint (ignoring constraints with '\*' cardinality) should be at least __aceptance\_threshold__. If this does not happen, then __c__ will not be included in __s__.
 * verbose (dafault False): when it is set to True, the extraction process will print log messages through the standard output.
 * to_uml_path (default None). This parameter expects to receive a disk path. If you provide a value here, sheXer will generate a UML diagram containing the extracted scheme and will save it in the path indicated as a PNG image. WARNING: you should be connected to Internet in  order to make this work.
+* rdfconfig_directory (default None). This parameter expects to receive a disk path to a folder. If the folder does not exist, it will create it. When you give a value to rdfconfig_directory, sheXer will write in the specified folder  the files model.yaml, prefix.yaml and endpoint.yaml (just in case the data is being gathered form an endpoint) containing the structure minned from the input data and according to rdf-config specifications. 
 
 
