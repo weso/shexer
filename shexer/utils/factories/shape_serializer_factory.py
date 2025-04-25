@@ -6,10 +6,11 @@ from shexer.io.rdfconfig.formater.rdfconfig_serializer import RdfConfigSerialize
 from shexer.consts import RATIO_INSTANCES, UML_PLANT_SERVER
 
 
-def get_shape_serializer(output_format, shapes_list, target_file=None, string_return=False, namespaces_dict=None,
+def get_shape_serializer(output_format, shapes_list, instance_tracker, target_file=None, string_return=False, namespaces_dict=None,
                          instantiation_property=None, disable_comments=False, wikidata_annotation=False,
                          instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_features_examples=None,
-                         examples_mode=None, inverse_paths=False, rdfconfig_directory=None, endpoint_url=None):
+                         examples_mode=None, inverse_paths=False, rdfconfig_directory=None, endpoint_url=None,
+                         shape_map_raw=None, shape_map_file=None):
     if rdfconfig_directory is not None:
         return RdfConfigSerializer(target_directory=rdfconfig_directory,
                                    shapes_list=shapes_list,
@@ -39,7 +40,9 @@ def get_shape_serializer(output_format, shapes_list, target_file=None, string_re
                                instantiation_property_str=instantiation_property,
                                wikidata_annotation=wikidata_annotation,
                                shape_example_features=shape_features_examples,
-                               detect_minimal_iri=detect_minimal_iri)
+                               detect_minimal_iri=detect_minimal_iri,
+                               shape_map=None if (shape_map_file is None and shape_map_raw is None)
+                                               else instance_tracker.shape_map)
     else:
         raise ValueError("Currently unsupported format in 'output_format': " + output_format)
 

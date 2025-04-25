@@ -53,7 +53,7 @@ class ShaclSerializer(object):
 
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, wikidata_annotation=False,
-                 detect_minimal_iri=False, shape_example_features=None):
+                 detect_minimal_iri=False, shape_example_features=None, shape_map=None):
         self._target_file = target_file
         self._namespaces_dict = namespaces_dict if namespaces_dict is not None else {}
         self._shapes_list = shapes_list
@@ -62,6 +62,7 @@ class ShaclSerializer(object):
         self._wikidata_annotation = wikidata_annotation
         self._detect_minimal_iri = detect_minimal_iri
         self._shape_example_features = shape_example_features
+        self._shape_map = shape_map
 
         self._g_shapes = Graph()
 
@@ -126,10 +127,12 @@ class ShaclSerializer(object):
 
 
     def _add_target_class(self, shape, r_shape_uri):
-        if shape.class_uri is not None:
-            self._add_triple(r_shape_uri,
-                             _R_SHACL_TARGET_CLASS_PROP,
-                             URIRef(shape.class_uri))  # TODO check if this is always an abs. URI, not sure
+        if self._shape_map is None:
+            if shape.class_uri is not None:
+                self._add_triple(r_shape_uri,
+                                 _R_SHACL_TARGET_CLASS_PROP,
+                                 URIRef(shape.class_uri))  # TODO check if this is always an abs. URI, not sure
+        # TODO implement an else here and go for precise target classes
 
     def _add_min_iri (self, shape, r_shape_uri):
         # if shape.iri_pattern is not None:
