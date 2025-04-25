@@ -65,7 +65,7 @@ class TestShapeMapCompatibility(unittest.TestCase):
     def test_shape_map_compatibility_focus_expression(self):
         shape_map_raw = "{dbr:Felipe_VI dbo:predecessor FOCUS}" \
                         "@<http://example.org/shapes/Someone>"
-        # We are assuming in this text that this information won't change in DBpedia
+        # We are assuming in this test that this information won't change in DBpedia:
         # Felipe VI has a single predecessor (dbr:Juan_Carlos_I)
 
         shaper = Shaper(
