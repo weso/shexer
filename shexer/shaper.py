@@ -283,7 +283,8 @@ class Shaper(object):
             serializer = self._build_shapes_serializer(target_file=output_file,
                                                        string_return=string_output,
                                                        output_format=output_format,
-                                                       rdfconfig_directory=rdfconfig_directory)
+                                                       rdfconfig_directory=rdfconfig_directory,
+                                                       verbose=verbose)
             current_result = serializer.serialize_shapes()
         if current_result is None:
             current_result = ""
@@ -293,7 +294,9 @@ class Shaper(object):
                     msg="Generating text serialization...")
             serializer = self._build_shapes_serializer(target_file=output_file,
                                                        string_return=string_output,
-                                                       output_format=output_format)
+                                                       output_format=output_format,
+                                                       rdfconfig_directory=rdfconfig_directory,
+                                                       verbose=verbose)
             res = serializer.serialize_shapes()
             if string_output:
                 return current_result + res  # If string return is active, returns string.
@@ -355,7 +358,7 @@ class Shaper(object):
                                 allow_redundant_or=self._allow_redundant_or,
                                 federated_sources=self._federated_sources)
 
-    def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory=None):
+    def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory, verbose):
         return get_shape_serializer(shapes_list=self._shape_list,
                                     target_file=target_file,
                                     string_return=string_return,
@@ -370,7 +373,11 @@ class Shaper(object):
                                     examples_mode=self._examples_mode,
                                     inverse_paths=self._inverse_paths,
                                     rdfconfig_directory=rdfconfig_directory,
-                                    endpoint_url=self._url_endpoint)
+                                    endpoint_url=self._url_endpoint,
+                                    shape_map_file=self._shape_map_file,
+                                    shape_map_raw=self._shape_map_raw,
+                                    instance_tracker=self._instance_tracker,
+                                    verbose=verbose)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,

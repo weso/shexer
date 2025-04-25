@@ -12,7 +12,7 @@ class NodeSelector(object):
 
     def get_target_nodes(self):
         """
-        It return a list of target URIs. It may require to execute some query against a given endpoint
+        It returns a list of target URIs. It may require to execute some query against a given endpoint
 
         :return:
         """
