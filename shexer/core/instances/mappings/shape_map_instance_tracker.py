@@ -17,6 +17,10 @@ class ShapeMapInstanceTracker(AbstractInstanceTracker):
                 msg="Instance tracker finished. {} instances located".format(len(self._instances_dict)))
         return self._instances_dict
 
+    @property
+    def shape_map(self):
+        return self._shape_map
+
     def _solve_targets_of_an_item(self, an_item):
         for a_node in an_item.node_selector.get_target_nodes():
             if a_node not in self._instances_dict:
