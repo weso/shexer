@@ -1,4 +1,4 @@
-from rdflib import Graph
+from rdflib import Graph, URIRef, Literal
 from rdflib.compare import to_isomorphic, graph_diff
 import re
 from os.path import isfile, exists as file_exists
@@ -220,6 +220,7 @@ def file_vs_str_exact_comparison(file_path, target_str):
     with open(file_path, "r") as in_stream:
         return in_stream.read().strip() == target_str.strip()
 
+
 def filter_prefixes_str_shex(target_str):
     result = []
     lines = target_str.split("\n")
@@ -230,14 +231,13 @@ def filter_prefixes_str_shex(target_str):
         counter += 1
     return "\n".join(lines[counter:]).strip() if counter > 0 else target_str
 
+
 def file_vs_str_shex_exact_comparison_excluding_prefixes(file_path, str_target):
     with open(file_path, "r") as in_stream:
         target_file_content = filter_prefixes_str_shex(in_stream.read().strip())
         target_str_content = filter_prefixes_str_shex(str_target.strip())
 
         return target_file_content == target_str_content
-
-
 
 
 def file_vs_file_tunned_comparison(file_path1, file_path2, or_shapes=False):
@@ -276,6 +276,37 @@ def graph_comparison_rdflib(g1, g2):
     iso2 = to_isomorphic(g2)
     both, in1, in2 = graph_diff(iso1, iso2)
     return len(both) == len(g1) and len(in1) == 0 and len(in2) == 0
+
+
+def _tune_elem_for_rdflib_comparison(original_elem):
+    if original_elem is None:
+        return None
+    elif original_elem.startswith("<"):
+        return URIRef(original_elem[1:-1])
+    else:  # It should be a literal
+        return Literal(original_elem)
+
+
+def rdflib_exist_triple(graph, t_subject, t_predicate, t_object):
+    return any(
+        [a_triple for a_triple in graph.triples(
+            (_tune_elem_for_rdflib_comparison(t_subject),
+             _tune_elem_for_rdflib_comparison(t_predicate),
+             _tune_elem_for_rdflib_comparison(t_object)
+             )
+        )]
+    )
+
+
+def rdflib_counts_triples(graph, t_subject, t_predicate, t_object):
+    return len(
+        [a_triple for a_triple in graph.triples(
+            (_tune_elem_for_rdflib_comparison(t_subject),
+             _tune_elem_for_rdflib_comparison(t_predicate),
+             _tune_elem_for_rdflib_comparison(t_object)
+             )
+        )]
+    )
 
 
 def graph_comparison_file_vs_str(file_path, str_target, format="turtle"):

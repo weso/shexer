@@ -6,6 +6,8 @@ from shexer.utils.uri import XSD_NAMESPACE, LANG_STRING_TYPE
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, LITERAL_ELEM_TYPE, DOT_ELEM_TYPE, BNODE_ELEM_TYPE
 from shexer.io.wikidata import wikidata_annotation
 from wlighter import TURTLE_FORMAT
+from shexer.model.node_selector import NodeSelectorSparql, NodeSelectorNoSparql
+from shexer.utils.log import log_msg
 
 _EXPECTED_SHAPE_BEGINING = STARTING_CHAR_FOR_SHAPE_NAME + "<"
 _EXPECTED_SHAPE_ENDING = ">"
@@ -18,6 +20,7 @@ _R_SHACL_SHAPE_URI = URIRef(_SHACL_NAMESPACE + "NodeShape")
 _R_SHACL_PROPERTY_SHAPE_URI = URIRef(_SHACL_NAMESPACE + "PropertyShape")
 
 _R_SHACL_TARGET_CLASS_PROP = URIRef(_SHACL_NAMESPACE + "targetClass")
+_R_SHACL_TARGET_NODE_PROP = URIRef(_SHACL_NAMESPACE + "targetNode")
 _R_SHACL_PATH_PROP = URIRef(_SHACL_NAMESPACE + "path")
 _R_SHACL_INVERSE_PATH_PROP = URIRef(_SHACL_NAMESPACE + "inversePath")
 _R_SHACL_MIN_COUNT_PROP = URIRef(_SHACL_NAMESPACE + "minCount")
@@ -53,7 +56,7 @@ class ShaclSerializer(object):
 
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, wikidata_annotation=False,
-                 detect_minimal_iri=False, shape_example_features=None, shape_map=None):
+                 detect_minimal_iri=False, shape_example_features=None, shape_map=None, verbose=False):
         self._target_file = target_file
         self._namespaces_dict = namespaces_dict if namespaces_dict is not None else {}
         self._shapes_list = shapes_list
@@ -63,6 +66,7 @@ class ShaclSerializer(object):
         self._detect_minimal_iri = detect_minimal_iri
         self._shape_example_features = shape_example_features
         self._shape_map = shape_map
+        self._verbose = verbose
 
         self._g_shapes = Graph()
 
@@ -131,8 +135,9 @@ class ShaclSerializer(object):
             if shape.class_uri is not None:
                 self._add_triple(r_shape_uri,
                                  _R_SHACL_TARGET_CLASS_PROP,
-                                 URIRef(shape.class_uri))  # TODO check if this is always an abs. URI, not sure
-        # TODO implement an else here and go for precise target classes
+                                 URIRef(shape.class_uri))
+        else:
+            self._add_target_declaration_from_shape_map(shape, r_shape_uri)
 
     def _add_min_iri (self, shape, r_shape_uri):
         # if shape.iri_pattern is not None:
@@ -368,3 +373,22 @@ class ShaclSerializer(object):
         if self._string_return:
             return result
 
+
+    ########################## shape map HACKS
+
+    def _locate_shape_map_selector_in_shape_map(self, shape):
+        for an_item in self._shape_map.yield_items():
+            if shape.class_uri == an_item.shape_label:
+                return an_item.node_selector
+
+    def _add_target_declaration_from_shape_map(self, shape, r_shape_uri):
+        shape_map_selector = self._locate_shape_map_selector_in_shape_map(shape)
+        if type(shape_map_selector) == NodeSelectorSparql or shape_map_selector.raw_selector.startswith("{"):
+            log_msg(msg=f"WARNING: You are serializing to SHACL a shabe with label {shape.class_uri} whose target instances "
+                    f"are expressed with an SPARQL selector or a FOCUS expressions in a ShEx's shape map. As these selectors"
+                    f"are not supported in SHACL core, the target expression will consist of the list of target nodes"
+                    f"it is obtained when executing the shape maps selector's expression.", err=True, verbose=self._verbose)
+        for a_node in shape_map_selector.get_target_nodes():
+            self._add_triple(r_shape_uri,
+                             _R_SHACL_TARGET_NODE_PROP,
+                             URIRef(a_node))

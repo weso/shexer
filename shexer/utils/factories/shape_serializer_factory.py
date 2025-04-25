@@ -10,7 +10,7 @@ def get_shape_serializer(output_format, shapes_list, instance_tracker, target_fi
                          instantiation_property=None, disable_comments=False, wikidata_annotation=False,
                          instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_features_examples=None,
                          examples_mode=None, inverse_paths=False, rdfconfig_directory=None, endpoint_url=None,
-                         shape_map_raw=None, shape_map_file=None):
+                         shape_map_raw=None, shape_map_file=None, verbose=False):
     if rdfconfig_directory is not None:
         return RdfConfigSerializer(target_directory=rdfconfig_directory,
                                    shapes_list=shapes_list,
@@ -41,6 +41,7 @@ def get_shape_serializer(output_format, shapes_list, instance_tracker, target_fi
                                wikidata_annotation=wikidata_annotation,
                                shape_example_features=shape_features_examples,
                                detect_minimal_iri=detect_minimal_iri,
+                               verbose=verbose,
                                shape_map=None if (shape_map_file is None and shape_map_raw is None)
                                                else instance_tracker.shape_map)
     else:
