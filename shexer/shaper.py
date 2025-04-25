@@ -369,7 +369,10 @@ class Shaper(object):
                                     examples_mode=self._examples_mode,
                                     inverse_paths=self._inverse_paths,
                                     rdfconfig_directory=rdfconfig_directory,
-                                    endpoint_url=self._url_endpoint)
+                                    endpoint_url=self._url_endpoint,
+                                    shape_map_file=self._shape_map_file,
+                                    shape_map_raw=self._shape_map_raw,
+                                    instance_tracker=self._instance_tracker)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,
