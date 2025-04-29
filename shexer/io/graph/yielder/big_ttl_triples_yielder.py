@@ -66,7 +66,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
 
     def yield_triples(self):
         self._reset_parsing()
-        for a_line in self._line_reader.read_lines():
+        for a_line in self._read_normalized_lines():
             for a_triple in self._process_line_2(a_line):
                 self._triples_count += 1
                 yield (
@@ -389,5 +389,24 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
         self._triples_count = 0
         self._ignored_triples = 0
         self._state = _WAITING_FOR_SUBJ
+
+    def _read_normalized_lines(self):
+        waiting = False
+        tmp = ''
+        for a_line in self._line_reader.read_lines():
+            if not waiting and '"""' not in a_line:
+                yield a_line
+            elif waiting and '"""' not in a_line:
+                tmp += a_line
+            elif not waiting and '"""' in a_line:
+                waiting = True
+                tmp = a_line.replace('"""', '"', 1)
+            elif waiting and '"""' in a_line:
+                waiting = False
+                yield tmp + a_line.replace('"""', '"', 1)
+                tmp = ''
+
+    def _scape_quotes_in_normalized_line(self, target):
+        
 
 
