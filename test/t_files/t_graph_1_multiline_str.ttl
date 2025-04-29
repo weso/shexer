@@ -1,0 +1,44 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:Jimmy a foaf:Person ;  # Complete
+	foaf:age "23"^^xsd:integer ;
+	foaf:name "Jimmy" ;
+	foaf:familyName "Jones" .
+
+ex:Sarah a foaf:Person ;  # Complete implicit type for age
+	foaf:age 22 ;
+	foaf:name "Sarah" ;
+	foaf:familyName "Salem" .
+
+ex:Bella a foaf:Person ;  # Missing familyName
+	foaf:age "56"^^xsd:integer ;
+	foaf:name "Isabella" .
+
+ex:David a foaf:Person ;  # Missing age and use knows
+	foaf:name """ David
+	    but in two lines """ ;
+	foaf:familyName "Doulofeau" ;
+	foaf:knows ex:Sarah .
+
+ex:HumanLike foaf:name "Person" ;  # foaf properties, but not explicit type.
+	foaf:familyName """ Maybe
+	there is a
+	     value here
+	     and can be quoted such as "this"
+	     and thats "not an issue" at all
+	     because those quotes are scaped """ ;
+	foaf:age 99 ;
+	foaf:knows ex:David .
+
+ex:x1 rdf:type foaf:Document ;
+	foaf:depiction "A thing that is nice" ;
+	foaf:title "A nice thing" .
+
+
+ex:x2 rdf:type foaf:Document ;
+	foaf:title "Another thing" .
+
