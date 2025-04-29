@@ -157,7 +157,7 @@ class RdfConfigSerializer(object):
                f"{load_whole_file_content(self._endpoint_file) if self._endpoint_url is not None else 'Endpoint not provided'}\n" \
                f"{self._header(_PREFIX_FILE_NAME)}\n" \
                f"{load_whole_file_content(self._prefixes_file)}\n" \
-               f"{self._header(_PREFIX_FILE_NAME)}\n" \
+               f"{self._header(_MODEL_FILE_NAME)}\n" \
                f"{load_whole_file_content(self._model_file)}"
 
     def _header(self, file_name):

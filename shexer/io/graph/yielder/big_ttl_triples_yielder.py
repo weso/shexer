@@ -66,7 +66,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
 
     def yield_triples(self):
         self._reset_parsing()
-        for a_line in self._line_reader.read_lines():
+        for a_line in self._read_normalized_lines():
             for a_triple in self._process_line_2(a_line):
                 self._triples_count += 1
                 yield (
@@ -389,5 +389,56 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
         self._triples_count = 0
         self._ignored_triples = 0
         self._state = _WAITING_FOR_SUBJ
+
+    def _read_normalized_lines(self):
+        waiting = False
+        tmp = ''
+        for a_line in self._line_reader.read_lines():
+            if not waiting and '"""' not in a_line:
+                yield a_line
+            elif waiting and '"""' not in a_line:
+                tmp += self._scape_quotes_in_normalized_line(a_line)
+            elif not waiting and '"""' in a_line:
+                waiting = True
+                tmp = self._scape_quotes_in_normalized_line(a_line).replace('"""', '"', 1)
+            elif waiting and '"""' in a_line:
+                waiting = False
+                yield tmp + self._scape_quotes_in_normalized_line(a_line).replace('"""', '"', 1)
+                tmp = ''
+
+    def _scape_quotes_in_normalized_line(self, target):
+        triple_quotes = []
+        normal_quotes = []
+
+        a_char_index = 0
+        while a_char_index < len(target):
+            if target[a_char_index] == '"':
+                if a_char_index + 2 < len(target) and target[a_char_index+1:a_char_index+3] == '""':
+                    triple_quotes.append(a_char_index)
+                    a_char_index += 2
+                else:
+                    normal_quotes.append(a_char_index)
+            a_char_index += 1
+        if len(triple_quotes) > 1:
+            raise StringMultilineSingleLineError(target)
+        if len(normal_quotes) == 0:
+            return target
+        normal_quotes = [0] + normal_quotes + [len(target)]
+
+        parts = []
+        target_index_in_quotes_list = 0
+        while target_index_in_quotes_list < len(normal_quotes) -1:
+            parts.append(target[normal_quotes[target_index_in_quotes_list]:normal_quotes[target_index_in_quotes_list+1]])
+            target_index_in_quotes_list += 1
+        return "\\".join(parts)
+
+
+
+class StringMultilineSingleLineError(TypeError):
+
+    def __init__(self, line):
+        super().__init__(f"It looks like there is a multiline string with several triple quotes in the same line. "
+                         "This may be valid turtle syntax though. If that's your case and you get this error, please, "
+                         f"share your input and code in an issue te sheXer's repository. Conflictive line: '{line}'")
 
 
