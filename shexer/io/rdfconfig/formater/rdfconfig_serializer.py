@@ -132,7 +132,10 @@ class RdfConfigSerializer(object):
             elif example_cons.startswith("http://") or example_cons.startswith("https://"):
                 example_cons = self._nice_uri(example_cons)
             elif not example_cons.isnumeric():
-                example_cons = f'"{example_cons}"'
+                if example_cons.startswith('"') and "@" in example_cons:  # This must be a lang string
+                    example_cons = example_cons[:example_cons.find("@")]
+                elif not example_cons.startswith('"'):
+                    example_cons = f'"{example_cons}"'
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
                                    content=f"{st_property}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,
