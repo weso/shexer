@@ -12,6 +12,7 @@ _RDF_TYPE_URI = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
 _BOOLEANS = ["true", "false"]
 _INI_BASE_URIS = ["/", "#"]
 _CLOSURES = [",", ";", "."]
+_SPECIAL_CHARS_AFTER_QUOTES = ["^","@"]
 _S = 0
 _P = 1
 _O = 2
@@ -211,7 +212,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
                                                        start_index=start_index+1)
         if next_quotes +1 > len(target_str) or target_str[next_quotes + 1] == " ":
             return next_quotes
-        elif target_str[next_quotes + 1] == "^":
+        elif target_str[next_quotes + 1] in _SPECIAL_CHARS_AFTER_QUOTES:
             return self._find_next_blank(target_str, next_quotes) - 1
         else:
             raise ValueError("Malformed literal? It seems like there is a problem of unmatching quotes: " + target_str)
