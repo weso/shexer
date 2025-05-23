@@ -3,8 +3,7 @@ from shexer.utils.uri import prefixize_uri_if_possible
 from shexer.io.shex.formater.consts import SHAPE_LINK_CHAR
 
 def build_shapes_name_for_class_uri(class_uri, shapes_namespace):
-
-    if class_uri.startswith("@"): # special shape case
+    if class_uri.startswith(SHAPE_LINK_CHAR): # special shape case
         return class_uri
     if class_uri.startswith("<") and class_uri.endswith(">"):
         return STARTING_CHAR_FOR_SHAPE_NAME + class_uri
@@ -21,7 +20,7 @@ def build_shapes_name_for_class_uri(class_uri, shapes_namespace):
     if last_piece.startswith("<"):
         last_piece = last_piece[1:]
     return STARTING_CHAR_FOR_SHAPE_NAME + "<" + shapes_namespace + last_piece + ">" if last_piece is not None else class_uri
-        # return class_uri
+
 
 
 def build_shape_name_for_qualifier_prop_uri(prop_uri, shapes_namespace):  # TODO REVIEW!

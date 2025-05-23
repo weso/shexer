@@ -1,6 +1,7 @@
 from shexer.core.profiling.class_profiler import RDF_TYPE_STR
 from shexer.utils.file import load_whole_file_content
-from shexer.utils.uri import prefixize_uri_if_possible
+from shexer.utils.uri import prefixize_uri_if_possible, get_prefix_of_namespace_if_it_exists
+from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 import os
 
@@ -55,31 +56,65 @@ class RdfConfigSerializer(object):
             self._serialize_constraint(shape=shape,
                                        constraint=a_constraint)
 
-
-    def _variable_property_name(self, st_property):
-        original = self._create_var_name_for_property(st_property)  # TODO improve
-        candidate = original
-        counter = 1
-        while candidate in self._variables_used:
-            counter +=1
-            candidate = original + str(counter)
+    def _variable_property_name(self, st_property, st_type, shape_uri):
+        candidate = self._create_var_name_for_property(st_property, shape_uri)  # TODO improve
+        if candidate in self._variables_used:
+            candidate += self._add_type_tag_to_var_name(st_type)
+            tmp = candidate
+            counter = 1
+            while candidate in self._variables_used:
+                candidate = tmp + str(counter)
+                counter += 1
         self._variables_used.add(candidate)
         return candidate
 
-    def _create_var_name_for_property(self, st_property):
-        st_property.replace("_","")
-        st_property=st_property.lower()
-        for i in range(len(st_property) - 1, -1, -1):
-            if not st_property[i].isalnum():
-                return st_property[i+1:]
-        return "var_name"
+    def _add_type_tag_to_var_name(self, st_type):
+        st_type.replace("_", "")
+        st_property = st_type.lower()
+        candidate = ""
+        for i in range(len(st_property) - 1, -1, -1):  # Locate suffix
+            if st_property[i] in ["/", "#"]:
+               return st_property[i + 1:]
+        return candidate
 
+    def _create_var_name_for_property(self, st_property, shape_uri):
+        st_property.replace("_", "")
+        st_property = st_property.lower()
+        candidate = ""
+        for i in range(len(st_property) - 1, -1, -1):  # Locate suffix
+            if st_property[i] in ["/", "#"]:
+                candidate = st_property[i + 1:]
+                break
+        if candidate != "":  # Try to locate prefixed namespace
+            prefix = get_prefix_of_namespace_if_it_exists(target_uri=st_property,
+                                                          namespaces_prefix_dict=self._namespaces_dict,
+                                                          corners=False)
+            if prefix is not None:
+                candidate = prefix + "_" + candidate
+        else: # if there is no suffix, get letters and numbers
+            for char in st_property:
+                if not char.isalnum():
+                    candidate += char
+        shape_tag = self._shape_tag_for_var_name(shape_uri)
+        return f"{candidate}_of_{shape_tag}"
+
+        # return "var_name"
+    def _shape_tag_for_var_name(self, class_uri):
+        last_piece = class_uri
+        if "#" in last_piece and last_piece[-1] != "#":
+            last_piece = last_piece[last_piece.rfind("#") + 1:]
+        if "/" in last_piece:
+            if last_piece[-1] != "/":
+                last_piece = last_piece[last_piece.rfind("/") + 1:]
+            else:
+                last_piece = last_piece[last_piece[:-1].rfind("/") + 1:]
+        return last_piece
     def _create_subject_name_for_shape(self, shape_uri):
-        shape_uri.replace("_","")
+        shape_uri.replace("_", "")
         shape_uri.replace("-", "")
         for i in range(len(shape_uri) - 1, -1, -1):
             if not shape_uri[i].isalnum():
-                return "Shape" + shape_uri[i+1:].capitalize()
+                return "Shape" + shape_uri[i + 1:].capitalize()
         return "SubjectName"
 
     def _shape_subject_name(self, shape_uri):
@@ -93,7 +128,6 @@ class RdfConfigSerializer(object):
             self._shape_names_used.add(candidate)
             self._subjects_dict[shape_uri] = candidate
         return self._subjects_dict[shape_uri]
-
 
     def _write_shape_line(self, content, indentation):
         indentation_str = ' ' * 2 * indentation
@@ -136,10 +170,18 @@ class RdfConfigSerializer(object):
                     example_cons = example_cons[:example_cons.find("@")]
                 elif not example_cons.startswith('"'):
                     example_cons = f'"{example_cons}"'
+            if len(example_cons) >= 2:
+                example_cons =  example_cons[0] +  example_cons[1:-1].replace('"', '\\"') + example_cons[-1]
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
                                    content=f"{st_property}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,
-                                   content=f"{self._variable_property_name(constraint.st_property)}: {example_cons}")
+                                   content="{}: {}".format(self._variable_property_name(
+                                       st_property=constraint.st_property,
+                                       st_type=constraint.st_type,
+                                       shape_uri=shape.class_uri),
+                                                           example_cons))
+
+
 
     def _serialize_prefixes(self):
         with open(self._prefixes_file, "w") as out_stream:
@@ -175,4 +217,3 @@ class RdfConfigSerializer(object):
         return prefixize_uri_if_possible(target_uri=result,
                                          namespaces_prefix_dict=self._namespaces_dict,
                                          corners=True)
-
