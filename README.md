@@ -22,11 +22,11 @@ sheXer can be installed using pip:
 
     $ pip install shexer
 	
-Iy you want to install sheXer by source, all its external dependencies are listed in the file requirements.txt. You can install them all as well using pip:
+If you want to install sheXer by source, all its external dependencies are listed in the file requirements.txt. You can install them all as well using pip:
 
     $ pip install -r requirements.txt
 
-sheXer includes a package to deploy a wer service exposing sheXer with a REST API. In case you are not interested in deploying this web service, you don't need to install any dependency related to Flask.
+sheXer includes a package to deploy a web service exposing sheXer with a REST API. In case you are not interested in deploying this web service, you don't need to install any dependency related to Flask.
 
 
 ## Features
@@ -35,15 +35,15 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Several ways to provide input data**, consisting of a target graph and some target shapes. Tha graph can be provided via raw string content, local/remote file(s), or tracking on the fly some triples from a SPARQL endpoint. There are defined interfaces in case you want to implement some other way to provide input information. 
 
-* **Several ways to select your target shapes**. You may want to generate shapes for each class in the graph or maybe just for some of them. You may want to generate a shape for some custom node agrupations. Or maybe you are extracting some shapes from a big grpah and you just want to explore the neighborhood of some seed nodes.  For custom node aggrupations sheXer supports ShEx's shape maps syntax, and it provides configuration params to target different classes or graph depths. 
+* **Several ways to select your target shapes**. You may want to generate shapes for each class in the graph or maybe just for some of them. You may want to generate a shape for some custom node groupings. Or maybe you are extracting some shapes from a big grpah and you just want to explore the neighborhood of some seed nodes.  For custom node aggrupations sheXer supports ShEx's shape maps syntax, and it provides configuration params to target different classes or graph depths. 
 
-* **Valid ShEx and SHACL**. The produced shapes are compilant with the current specification of ShEx2 and SHACL.
+* **Valid ShEx and SHACL**. The produced shapes are compliant with the current specification of ShEx2 and SHACL.
 
 * **UML**. You can also generate UML-like views of the extracted schemas.
 
 * **rdf-config generation**. You can generate rdf-config YAML files as well. Check uses of this technology at the [rdf-config repository](https://github.com/dbcls/rdf-config).
 
-* **Threshold of tolerance**. The constraints inferred for each shape may not be compatible with every node associated to the shapes. With this threshold you can indicate the minimun percentage of nodes that should conform with a constraint c. If c does not reach the indicated ratio, its associated information will not appear in the final shape.
+* **Threshold of tolerance**. The constraints inferred for each shape may not be compatible with every node associated to the shapes. With this threshold you can indicate the minimum percentage of nodes that should conform with a constraint c. If c does not reach the indicated ratio, its associated information will not appear in the final shape.
 
 * **Informative comments** (just for ShEx, by now). Each constraint inferred is associated to one or more comments. Those comments include different types of information, such as the ratio of nodes that actually conform with a given constraint. You can keep this informative comments or exclude them from the results.
 
@@ -55,9 +55,9 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Special treatment of rdf:type** (or the specified instantiation property). When the predicate of a triple is rdf:type, sheXer creates a constraint whose object is a value set containing a single element. This is the actual object of the original triple.
 
-* **Cardinality management**. Some of the triples of a given instance may fit in an infinite number of constraint triples with the same predicate and object but different cardinality. For example, if a given instance has a single label specified by rdfs:label, that makes it fit with infinite triple constraints with the schema {rdfs:label xsd:string C}, where C can be any cardinality that includes the posibility of a single occurrence: {1}, + , {1,2}, {1,3}, {1,4},... Currently, sheXer admints exact cardinalities ({2}, {3}..), kleene closure (\*), positive closure (+), and optional cardinality (?).
+* **Cardinality management**. Some of the triples of a given instance may fit in an infinite number of constraint triples with the same predicate and object but different cardinality. For example, if a given instance has a single label specified by rdfs:label, that makes it fit with infinite triple constraints with the schema {rdfs:label xsd:string C}, where C can be any cardinality that includes the possibility of a single occurrence: {1}, + , {1,2}, {1,3}, {1,4},... Currently, sheXer recognises exact cardinalities ({2}, {3}..), kleene closure (\*), positive closure (+), and optional cardinality (?).
 
-* **Inverse paths**. sheXer can extract constraints related to incomming links. Shapes are usually described using contraints realted to outgoing links, i.d., triples in which the node is the subject. However, sheXer can extract also constraints where the node is the object.
+* **Inverse paths**. sheXer can extract constraints related to incoming links. Shapes are usually described using constraints realted to outgoing links, i.e., triples in which the node is the subject. However, sheXer can extract also constraints where the node is the object.
 
 * **Configurable priority of cardinalities**. sheXer can be configured to prioritize the less specific cardinality or the most specific one if its trustworthiness score is high enough.
 
@@ -69,7 +69,7 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Adaptation to Wikidata model**. sheXer includes configuration params to handle Wikidata's data model regarding qualifiers, so you can automatically extract the schema of qualifier nodes too. You can also produce content where each Wikidata ID is associated with  its label in comments, as sheXer is integrated with [wLighter](https://github.com/DaniFdezAlvarez/wLighter).
 
-* **Extraction of shapes for federation**. You can configure sheXer to extract information form several endpoints whose URIs are connected. sheXer will extract shapes combining information of both ends which can be helpful fro making federated queries.
+* **Extraction of shapes for federation**. You can configure sheXer to extract information form several endpoints whose URIs are connected. sheXer will extract shapes combining information of both ends which can be helpful for making federated queries.
 
 
 ## Experimental results
@@ -163,7 +163,7 @@ The __init__ method of Shaper includes many params, being optional most of them.
 
 * How are you going to provide the graph to the library? Via a raw string, a local file, a downloadable content, an SPARQL endpoint...
 * Which shapes do you want to extract? A group of target classes, every class in the graph, or custom node groupings specified with shape maps (in a string, in a file...)?
-* Do you want to configure some special feature to tune the extraction process? Priority to less specific constraints, all-compliant mode, disbale comments...
+* Do you want to configure some special feature to tune the extraction process? Priority to less specific constraints, all-compliant mode, disable comments...
 
 You'll find a param in the __init__ of Shaper to provide the information in the way you want. Use it using a keyword when creating your instance of Shaper (as in the example code of this document) and just forget about the rest. Shaper has a default value for them all.
 
@@ -182,7 +182,7 @@ You must indicate al least one way to identify target instances and the shapes t
 You must provide at least an input: a file, a string, an endpoint, a remote graph... you may also want to tune some other aspects, such as the format of the input or namespace-prefix pairs to be used.
 
 
-* instances_file_input (default None): in case you have a separate file in which instantiation relations can be found, provide its path here. If you dont provide any value, the shaper will look for instances in the graph used as input.
+* instances_file_input (default None): in case you have a separate file in which instantiation relations can be found, provide its path here. If you don't provide any value, the shaper will look for instances in the graph used as input.
 * graph_file_input (default None): a path to the file in which the target graph can be found.
 * graph_list_of_files_input (default None): in case your graph is separated in several files (all of them with the same format), provide a list of string paths to those files here.
 * raw_graph (default None): a simple raw string containing the target graph.
@@ -225,9 +225,9 @@ Again, all these params have a default value and you don't need to worry about t
 * remove_empty_shapes (default: True). When set to True, the result does not contain any empty shape nor any mention to it. If a shape A has a constraint pointing to a shape B and B is empty, then the constraint is modified and the macro IRI is used instead of B.
 * disable_comments (dafault: False). When set to True, the results do not contain comments.
 * shapes_namespace (default: http://weso.es/shapes/). This property allows you to change the namespace in which the shape labels are created in case you do not want to use the default one. The prefix of this namespace will be the empty prefix unless the empty prefix is already being used by other namespace. In that case, sheXer looks for other preferred prefixes, or will generate a random one if any of the default ones is available. 
-* wikidata_annotation (default: False). This param can be used when the output will contain Wikidata IDs. Using the library [wLighter](https://github.com/DaniFdezAlvarez/wLighter), the ourput is annotated with comments that associate a given every Wikidata ID with its English label. 
-* instances_report_mode (default, const.RATIO_INSTANCES). With this parameter, you can configure how is the information about instances complying to each expression shown. By default, sheXer shows a percetage of instances. If you set this parameter to const.ABSOLUTE_INSTANCES, then the comments will contain the exact number of complying instances instead of the ratio. sheXer will write a comment next to the shape label so you can also know how many isntances were used to extract a shape. If you set the parameter to const.MIXED_INSTANCES, the comments will contain both relative and absolute information.
-* decimals (default: -1). With this parameter you can configure the numnber of decimals to be used when writing ratios in comments. A negative numnber means that ratios will be written using its top precission. If you set this parameter to a natural number (including 0), then such number will be the number of decimals used. sheXer will round (not truncate) the original ratio to that precission.
+* wikidata_annotation (default: False). This param can be used when the output will contain Wikidata IDs. Using the library [wLighter](https://github.com/DaniFdezAlvarez/wLighter), the output is annotated with comments that associate a given every Wikidata ID with its English label. 
+* instances_report_mode (default, const.RATIO_INSTANCES). With this parameter, you can configure how is the information about instances complying to each expression shown. By default, sheXer shows a percetage of instances. If you set this parameter to const.ABSOLUTE_INSTANCES, then the comments will contain the exact number of complying instances instead of the ratio. sheXer will write a comment next to the shape label so you can also know how many instances were used to extract a shape. If you set the parameter to const.MIXED_INSTANCES, the comments will contain both relative and absolute information.
+* decimals (default: -1). With this parameter you can configure the number of decimals to be used when writing ratios in comments. A negative numnber means that ratios will be written using its top precision. If you set this parameter to a natural number (including 0), then such number will be the number of decimals used. sheXer will round (not truncate) the original ratio to that precision.
 * examples_mode (default: None). You can set this parameter to one of the values included in the '#EXAMPLES' section of shexer.consts. If you choose SHAPE_EXAMPLES, sheXer will write the URI of an instance matching each shape extracted as a comment next to the shape label. If you choose CONSTRAINT_EXAMPLES, sheXer will write a comment including an example of node constraint matching each triple constraint of each shape (each value is used by an instance example with the triple constraint's property). If you choose ALL_EXAMPLES, sheXer will do both things. When the value of this parameter is None, sheXer will not serialize examples in comments.
 
 
@@ -238,7 +238,7 @@ The method __shex\_graph__  of shexer triggers all the inference process and giv
 * string_output (default False): when it is set to True, the method returns a string representation of the inferred shapes. It must be set to True iff output_file is None.
 * output_file (default None): it specifies the path of the file in which the inferred shapes will be written. It must have a value different to None iff string_output is False.
 * output_format (default "ShExC"): format in which the inferred shapes will be serialized. The values currently supported are const.SHEXC and const.SHACLE_TURTLE.
-* aceptance_threshold (default 0): Given a certain inferred constraint __c__ for a shape __s__, the ammount of instances which conform to this constraint (ignoring constraints with '\*' cardinality) should be at least __aceptance\_threshold__. If this does not happen, then __c__ will not be included in __s__.
+* acceptance_threshold (default 0): Given a certain inferred constraint __c__ for a shape __s__, the ammount of instances which conform to this constraint (ignoring constraints with '\*' cardinality) should be at least __acceptance\_threshold__. If this does not happen, then __c__ will not be included in __s__.
 * verbose (dafault False): when it is set to True, the extraction process will print log messages through the standard output.
 * to_uml_path (default None). This parameter expects to receive a disk path. If you provide a value here, sheXer will generate a UML diagram containing the extracted scheme and will save it in the path indicated as a PNG image. WARNING: you should be connected to Internet in  order to make this work.
 * rdfconfig_directory (default None). This parameter expects to receive a disk path to a folder. If the folder does not exist, it will create it. When you give a value to rdfconfig_directory, sheXer will write in the specified folder  the files model.yaml, prefix.yaml and endpoint.yaml (just in case the data is being gathered form an endpoint) containing the structure minned from the input data and according to rdf-config specifications. 
