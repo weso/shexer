@@ -33,7 +33,7 @@ sheXer includes a package to deploy a wer service exposing sheXer with a REST AP
 
 * **Process huge sources**. sheXer does not need to load the whole content of the graph in main memory at any time, so big graphs can be processed in average hardware. Currently this is available just for some input formats: n-triples (choose const.NT as for input_format), and turtle (choose const.TURTLE_ITER).
 
-* **Several ways to provide input data**, consisting of a target graph and some target shapes. Tha graph can be provided via raw string content, local/remote file(s), or tracking on the fly some triples from a SPARQL endpoint. There are defined interfaces in case you want to implement some other way to provide input information. 
+* **Several ways to provide input data**, consisting of a target graph and some target shapes. The graph can be provided via raw string content, local/remote file(s), or tracking on the fly some triples from a SPARQL endpoint. There are defined interfaces in case you want to implement some other way to provide input information. 
 
 * **Several ways to select your target shapes**. You may want to generate shapes for each class in the graph or maybe just for some of them. You may want to generate a shape for some custom node agrupations. Or maybe you are extracting some shapes from a big grpah and you just want to explore the neighborhood of some seed nodes.  For custom node aggrupations sheXer supports ShEx's shape maps syntax, and it provides configuration params to target different classes or graph depths. 
 
