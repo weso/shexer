@@ -1,6 +1,6 @@
 # sheXer
 
-This library can be used to perform automatic extraction of shape expressions (ShEx) or Shapes Constraint Language (SHACL) for a target RDF grpah. Please, feel free to add an issue to this repository if you find any bug in sheXer or if you have a feature request.
+This library can be used to perform automatic extraction of shape expressions (ShEx) or Shapes Constraint Language (SHACL) for a target RDF graph. Please, feel free to add an issue to this repository if you find any bug in sheXer or if you have a feature request.
 
 
 Language:
