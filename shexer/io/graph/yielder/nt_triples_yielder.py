@@ -1,5 +1,5 @@
 from shexer.utils.log import log_msg
-from shexer.utils.uri import there_is_arroba_after_last_quotes
+from shexer.utils.literal import there_is_arroba_after_last_quotes
 from shexer.utils.triple_yielders import tune_prop, tune_token  # , check_if_property_belongs_to_namespace_list
 from shexer.io.graph.yielder.base_triples_yielder import BaseTriplesYielder
 

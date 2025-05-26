@@ -2,7 +2,7 @@ from shexer.core.profiling.class_profiler import RDF_TYPE_STR
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from rdflib import Graph, Namespace, URIRef, RDF, BNode, XSD, Literal
 from shexer.model.statement import POSITIVE_CLOSURE, KLEENE_CLOSURE, OPT_CARDINALITY
-from shexer.utils.uri import XSD_NAMESPACE, LANG_STRING_TYPE
+from shexer.utils.literal import XSD_NAMESPACE, LANG_STRING_TYPE
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, LITERAL_ELEM_TYPE, DOT_ELEM_TYPE, BNODE_ELEM_TYPE
 from shexer.io.wikidata import wikidata_annotation
 from wlighter import TURTLE_FORMAT

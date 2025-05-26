@@ -1,5 +1,6 @@
 from shexer.io.graph.yielder.base_triples_yielder import BaseTriplesYielder
 from shexer.utils.uri import remove_corners, unprefixize_uri_mandatory
+from shexer.utils.literal import find_next_unescaped_quotes
 from shexer.utils.triple_yielders import tune_subj, tune_prop, tune_token
 import re
 
@@ -177,39 +178,9 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
         pos = target_str.find(" ", start_index)
         return len(target_str)-1 if pos == -1 else pos
 
-
-    def _find_next_unescaped_quotes(self, target_str, start_index):
-        pos = target_str.find('"', start_index)
-        while pos != -1:
-            if target_str[pos-1] != "\\":
-                return pos  # not escaped
-            # if pos >= 2 and target_str[pos-2] == '\\':
-            #     return pos  # the scape is scaped, so not escaped
-            if self._count_prior_backslashes(an_str=target_str,
-                                             quote_pos=pos) % 2 == 0:
-                return pos # the scape is scaped, so not escaped
-            pos = target_str.find('"', pos+1)
-        if pos == -1:
-            raise ValueError("Is this line malformed? Can`t find quotes matching: " + target_str)
-
-    def _count_prior_backslashes(self, an_str, quote_pos):
-        """
-        We assume that there is at least a backslash at an_str[pos-1], so pos-1 is a non-negative index of an_str
-        """
-        counter = 1
-        quote_pos -= 2
-        while quote_pos >= 0:
-            if an_str[quote_pos] == "\\":
-                counter += 1
-            else:
-                return counter
-            quote_pos -= 1
-        return counter
-
-
     def _find_next_quoted_literal_ending(self, target_str, start_index):
-        next_quotes = self._find_next_unescaped_quotes(target_str=target_str,
-                                                       start_index=start_index+1)
+        next_quotes = find_next_unescaped_quotes(target_str=target_str,
+                                                 start_index=start_index+1)
         if next_quotes +1 > len(target_str) or target_str[next_quotes + 1] == " ":
             return next_quotes
         elif target_str[next_quotes + 1] in _SPECIAL_CHARS_AFTER_QUOTES:

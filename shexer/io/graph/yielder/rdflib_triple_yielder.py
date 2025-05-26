@@ -7,7 +7,7 @@ from shexer.model.IRI import IRI as model_IRI
 from shexer.model.bnode import BNode as model_BNode
 from shexer.model.property import Property as model_Property
 
-from shexer.utils.uri import decide_literal_type
+from shexer.utils.literal import decide_literal_type
 from shexer.utils.compression import get_content_gz_file, get_content_zip_internal_file, get_content_xz_file
 
 _SUPPORTED_FORMATS = [N3, TURTLE, RDF_XML, NT, JSON_LD]

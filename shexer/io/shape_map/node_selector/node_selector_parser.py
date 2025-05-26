@@ -1,5 +1,6 @@
 
-from shexer.utils.uri import remove_corners, add_corners, RDF_TYPE
+from shexer.utils.uri import remove_corners, add_corners
+from shexer.utils.literal import RDF_TYPE
 from shexer.model.node_selector import NodeSelectorNoSparql, NodeSelectorSparql
 from rdflib.plugins import sparql
 import re
