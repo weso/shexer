@@ -2,7 +2,8 @@ from shexer.model.IRI import IRI
 from shexer.model.property import Property
 from shexer.model.Literal import Literal
 from shexer.model.bnode import BNode
-from shexer.utils.uri import remove_corners, parse_literal, parse_unquoted_literal, FLOAT_TYPE, INTEGER_TYPE
+from shexer.utils.uri import remove_corners
+from shexer.utils.literal import parse_literal, parse_unquoted_literal, FLOAT_TYPE, INTEGER_TYPE
 
 
 def check_if_property_belongs_to_namespace_list(str_prop, namespaces):

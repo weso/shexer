@@ -70,12 +70,16 @@ class ShapeExampleFeaturesDict(object):
     def _set_constraint_example_no_inverse(self, shape_id, prop_id, example):
         if shape_id not in self._base_dict:
             self._init_shape(shape_id)
-        self._base_dict[shape_id][_PROP_FEATURES_POS][prop_id] = example
+        self._base_dict[shape_id][_PROP_FEATURES_POS][prop_id] = self._normalize_example(example)
 
     def _set_constraint_example_inverse(self, shape_id, prop_id, example, inverse):
         if shape_id not in self._base_dict:
             self._init_shape(shape_id)
-        self._base_dict[shape_id][_PROP_FEATURES_POS][_POS_INVERSE if inverse else _POS_DIRECT][prop_id] = example
+        self._base_dict[shape_id][_PROP_FEATURES_POS][_POS_INVERSE if inverse else _POS_DIRECT][prop_id] = self._normalize_example(example)
+
+    def _normalize_example(self, example):
+        result = example.replace("\n", "\\n")
+        return result.replace("\"", '\\"')
 
     def _has_constraint_example_no_inverse(self, shape_id, prop_id):
         if shape_id not in self._base_dict:

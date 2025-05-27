@@ -109,6 +109,7 @@ class RdfConfigSerializer(object):
             else:
                 last_piece = last_piece[last_piece[:-1].rfind("/") + 1:]
         return last_piece
+
     def _create_subject_name_for_shape(self, shape_uri):
         shape_uri.replace("_", "")
         shape_uri.replace("-", "")
@@ -171,7 +172,8 @@ class RdfConfigSerializer(object):
                 elif not example_cons.startswith('"'):
                     example_cons = f'"{example_cons}"'
             if len(example_cons) >= 2:
-                example_cons =  example_cons[0] +  example_cons[1:-1].replace('"', '\\"') + example_cons[-1]
+                # example_cons =  example_cons[0] +  example_cons[1:-1].replace('"', '\\"') + example_cons[-1]
+                example_cons = example_cons[0] + example_cons[1:-1] + example_cons[-1]
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
                                    content=f"{st_property}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,

@@ -286,8 +286,6 @@ class Shaper(object):
                                                        rdfconfig_directory=rdfconfig_directory,
                                                        verbose=verbose)
             current_result = serializer.serialize_shapes()
-        if current_result is None:
-            current_result = ""
 
         if string_output or output_file is not None:
             log_msg(verbose=verbose,
@@ -295,7 +293,7 @@ class Shaper(object):
             serializer = self._build_shapes_serializer(target_file=output_file,
                                                        string_return=string_output,
                                                        output_format=output_format,
-                                                       rdfconfig_directory=rdfconfig_directory,
+                                                       rdfconfig_directory=None,
                                                        verbose=verbose)
             res = serializer.serialize_shapes()
             if string_output:
