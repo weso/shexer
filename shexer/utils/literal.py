@@ -78,7 +78,7 @@ def decide_literal_type(a_literal, base_namespace=None):
 
 def parse_literal(an_elem, base_namespace=None):
     closing_quotes = find_next_unescaped_quotes(an_elem, 1)
-    content = an_elem[1:closing_quotes]
+    content = an_elem[1:closing_quotes].replace("\\\"", "\"")
     elem_type = decide_literal_type(a_literal=an_elem,
                                     base_namespace=base_namespace)
     return content, elem_type

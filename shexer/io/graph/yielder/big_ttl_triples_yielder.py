@@ -69,7 +69,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
     def yield_triples(self):
         self._reset_parsing()
         for a_line in self._read_normalized_lines():
-            for a_triple in self._process_line_2(a_line):
+            for a_triple in self._process_line(a_line):
                 self._triples_count += 1
                 yield (
                     tune_subj(a_triple[_S],
@@ -90,7 +90,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
 
     def _remove_comments_if_needed(self, str_line):
         """Remove comments in the middle of the line.
-        Lines starting with # wont be erased
+        Lines starting with # won't be erased
         """
         if '"' not in str_line:  # Comment mark and no literals, trivial case
             return str_line[:str_line.find(" #")]
@@ -109,7 +109,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
         return str_line  # If this point is reached, it means that the potential comments
                          # are actual content of a string literal
 
-    def _process_line_2(self, str_line):
+    def _process_line(self, str_line):
         str_line = self._clean_line(str_line)
         if str_line == "":
             self._process_empty_line(str_line)
@@ -151,6 +151,8 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
             self._state = _WAITING_FOR_OBJ
         elif self._state == _WAITING_FOR_OBJ:
             self._tmp_o = self._parse_elem(token)
+            if self._tmp_o.startswith('"'):
+                self._tmp_o = self._tmp_o.replace('\\\\"','\\"')
             self._state = _NOT_WAITING
         else:
             raise ValueError("Malformed file. Processing an unexpected token: " + token)
@@ -187,45 +189,6 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
             return self._find_next_blank(target_str, next_quotes) - 1
         else:
             raise ValueError("Malformed literal? It seems like there is a problem of unmatching quotes: " + target_str)
-
-    def _process_line(self, str_line):
-        str_line = self._clean_line(str_line)
-        if str_line == "":
-            self._process_empty_line(str_line)
-        elif '"' in str_line:
-            self._process_line_with_literal(str_line)
-        elif str_line.startswith("@prefix"):
-            self._process_prefix_line(str_line)
-        elif str_line.startswith("@base"):
-            self._process_base_line(str_line)
-        elif str_line.startswith("#"):
-            self._process_comment_line(str_line)
-        elif str_line[-1] in [",", ".", ";"]:
-            if ", " in str_line[:-1]:
-                # If there is a comma in a URI, it can't be followed by a blank
-                self._process_multi_triple_line_commas(str_line)
-            else:
-                self._process_single_triple_line(str_line)
-        elif " " not in str_line:
-            if len(str_line) > 1:  # We are ensuring that this is not a single char, such as "," or "."
-                self._process_isolated_subject(str_line)
-        else:
-            self._process_unknown_line(str_line)
-
-    def _process_line_with_literal(self, line):
-        first_quotes_index = line.find('"')
-        s_o_line = line[:first_quotes_index].strip()
-        s_o_pieces = s_o_line.split(" ")
-        if len(s_o_pieces) == 2:
-            self._tmp_s = self._parse_elem(s_o_pieces[0])
-            self._tmp_p = self._parse_elem(s_o_pieces[1])
-        elif len(s_o_pieces) == 1 and s_o_pieces[0] != "":
-            self._tmp_p = self._parse_elem(s_o_pieces[0])
-        # The last char MUST be in [,.;] since this lines comes stripped.
-        # SO everything between first_quotes_index and line[-1], stripped
-        # should be out target literal (typed or not)
-        self._tmp_o = line[first_quotes_index:-1].rstrip()
-        self._decide_current_triple()
 
     def _process_prefix_line(self, line):
         pieces = line.split(" ")
@@ -287,7 +250,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
         self._decide_current_triple()
 
     def _process_isolated_subject(self, line):
-        # No splitt. Line is expected to contain a line with no blanks (isolated subject)
+        # No split. Line is expected to contain a line with no blanks (isolated subject)
         self._tmp_s = self._parse_elem(line)
         # No need to decide triple now, incomplete element
 
@@ -332,7 +295,7 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
                                              prefix_namespaces_dict=self._prefixes)
         elif raw_elem in _BOOLEANS or self._is_num_literal(raw_elem):
             return raw_elem
-            # else?? shouldnt happen, let it break with a nullpoitner
+            # else?? shouldn't happen, let it break with a nullpoitner
 
     def _parse_cornered_element(self, cornered_element):
         if self._base is None:
@@ -369,13 +332,13 @@ class BigTtlTriplesYielder(BaseTriplesYielder):
             if not waiting and '"""' not in a_line:
                 yield a_line
             elif waiting and '"""' not in a_line:
-                tmp += self._scape_quotes_in_normalized_line(a_line)
+                tmp += "\\n" + self._scape_quotes_in_normalized_line(a_line)
             elif not waiting and '"""' in a_line:
                 waiting = True
                 tmp = self._scape_quotes_in_normalized_line(a_line).replace('"""', '"', 1)
             elif waiting and '"""' in a_line:
                 waiting = False
-                yield tmp + self._scape_quotes_in_normalized_line(a_line).replace('"""', '"', 1)
+                yield tmp + "\\n" + self._scape_quotes_in_normalized_line(a_line).replace('"""', '"', 1)
                 tmp = ''
 
     def _scape_quotes_in_normalized_line(self, target):
