@@ -7,10 +7,10 @@ from shexer.shaper import Shaper
 
 def define_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_kg_path", required=False, help="Input path to the KG")
-    parser.add_argument("-o", "--output_shapes_path", required=False, help="Output path for the generated shapes")
+    parser.add_argument("-i", "--input_kg_path", required=True, help="Input path to the KG")
+    parser.add_argument("-o", "--output_shapes_path", required=True, help="Output path for the generated shapes in Turtle")
     parser.add_argument("-f", "--format", required=False,
-                        help="KG input format. Values: nt/tsv_spo/turtle/turtle_iter/xml/n3/json-ld (NT default")
+                        help="KG input format. Values: nt/tsv_spo/turtle/turtle_iter/xml/n3/json-ld (NT default)")
     return parser
 
 
