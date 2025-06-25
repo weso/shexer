@@ -41,3 +41,11 @@ ALL_EXAMPLES = "all"
 
 # UML
 UML_PLANT_SERVER = "http://www.plantuml.com/plantuml/img/"
+
+DEFAULT_NAMESPACES = {"http://example.org/": "ex",
+            "http://www.w3.org/XML/1998/namespace/": "xml",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+            "http://www.w3.org/2000/01/rdf-schema#": "rdfs",
+            "http://www.w3.org/2001/XMLSchema#": "xsd",
+            "http://xmlns.com/foaf/0.1/": "foaf"
+            }
