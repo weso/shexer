@@ -75,11 +75,12 @@ def query_endpoint_po_of_an_s(endpoint_url, str_query, p_id, o_id, max_retries=5
                                                fake_user_agent=fake_user_agent)
     result = []
     for row in result_query[_RESULTS_KEY][_BINDINGS_KEY]:
-        p_value = _add_corners_if_needed(target_elem=row[p_id][_VALUE_KEY],
-                                         elem_type=row[p_id][_TYPE_KEY])
-        o_value = _add_corners_if_needed(target_elem=_add_lang_if_needed(row[o_id]),
-                                         elem_type=row[o_id][_TYPE_KEY])
-        result.append((p_value, o_value))
+        if p_id in row and o_id in row:
+            p_value = _add_corners_if_needed(target_elem=row[p_id][_VALUE_KEY],
+                                             elem_type=row[p_id][_TYPE_KEY])
+            o_value = _add_corners_if_needed(target_elem=_add_lang_if_needed(row[o_id]),
+                                             elem_type=row[o_id][_TYPE_KEY])
+            result.append((p_value, o_value))
     return result
 
 

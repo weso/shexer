@@ -96,7 +96,7 @@ class RdfConfigSerializer(object):
                 if not char.isalnum():
                     candidate += char
         shape_tag = self._shape_tag_for_var_name(shape_uri)
-        return f"{candidate}_of_{shape_tag}"
+        return f"{candidate}_of_{shape_tag}".lower()
 
         # return "var_name"
     def _shape_tag_for_var_name(self, class_uri):
