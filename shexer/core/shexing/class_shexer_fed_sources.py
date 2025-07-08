@@ -15,13 +15,13 @@ class ClassShexerFedSources(ClassShexer):
                  disable_comments=False, namespaces_dict=None, tolerance_to_keep_similar_rules=0,
                  allow_opt_cardinality=True, disable_exact_cardinality=False, shapes_namespace=SHAPES_DEFAULT_NAMESPACE,
                  inverse_paths=False, decimals=-1, instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False,
-                 class_min_iris_dict=None, allow_redundant_or=False, fed_sources=None):
+                 class_min_iris_dict=None, allow_redundant_or=False, fed_sources=None, shape_names_dict=None):
         super().__init__(class_counts_dict, class_profile_dict, class_profile_json_file, remove_empty_shapes,
                          original_target_classes, original_shape_map, discard_useless_constraints_with_positive_closure,
                          keep_less_specific, all_compliant_mode, instantiation_property, disable_or_statements,
                          disable_comments, namespaces_dict, tolerance_to_keep_similar_rules, allow_opt_cardinality,
                          disable_exact_cardinality, shapes_namespace, inverse_paths, decimals, instances_report_mode,
-                         detect_minimal_iri, class_min_iris_dict, allow_redundant_or)
+                         detect_minimal_iri, class_min_iris_dict, allow_redundant_or, shape_names_dict)
         self._fed_sources = fed_sources
 
     def shex_classes(self, acceptance_threshold=0,
