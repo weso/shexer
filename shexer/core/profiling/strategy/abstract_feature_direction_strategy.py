@@ -128,6 +128,8 @@ class AbstractFeatureDirectionStrategy(object):
 
     def _get_shape_name_for_a_class(self, a_class):
         # self._assign_shape_name_if_needed(a_class)
+        if a_class.startswith("<"):
+            return self._shape_names_dict[a_class]
         return f"{STARTING_CHAR_FOR_SHAPE_NAME}<{self._shape_names_dict[a_class]}>"
 
     # def _assign_shape_name_if_needed(self, a_class):

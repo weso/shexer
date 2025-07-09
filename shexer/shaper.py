@@ -410,7 +410,8 @@ class Shaper(object):
                                   disable_endpoint_cache=self._disable_endpoint_cache,
                                   detect_minimal_iri=self._detect_minimal_iri,
                                   examples_mode=self._examples_mode,
-                                  federated_sources=self._federated_sources) # TODO IMPL.
+                                  federated_sources=self._federated_sources,
+                                  shapes_namespace=self._shapes_namespace)
 
 
     def _build_instance_tracker(self):
