@@ -270,6 +270,8 @@ class AbstractShexingStrategy(object):
 
 
     def _shape_name(self, class_key):
+        if class_key.startswith("<"):
+            return STARTING_CHAR_FOR_SHAPE_NAME + class_key
         return f"{STARTING_CHAR_FOR_SHAPE_NAME}<{self._shape_names_dict[class_key]}>"
 
 class MergeableConstraints(object):
