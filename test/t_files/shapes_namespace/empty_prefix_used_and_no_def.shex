@@ -13,7 +13,7 @@ weso-s:Person
    rdf:type  [foaf:Person]  ;
    foaf:age  xsd:integer  ?;
    foaf:familyName  xsd:string  ?;
-   foaf:knows  @<http://weso.es/shapes/Person>  ?
+   foaf:knows  @weso-s:Person  ?
 }
 
 

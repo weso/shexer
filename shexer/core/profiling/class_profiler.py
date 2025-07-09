@@ -21,7 +21,7 @@ class ClassProfiler(object):
     def __init__(self, triples_yielder, instances_dict, instantiation_property_str=RDF_TYPE_STR,
                  remove_empty_shapes=True, original_target_classes=None, original_shape_map=None,
                  shapes_namespace=SHAPES_DEFAULT_NAMESPACE, inverse_paths=False, detect_minimal_iri=False,
-                 examples_mode=None):
+                 examples_mode=None, namespaces_dict=None):
         self._triples_yielder = triples_yielder
         self._instances_dict = instances_dict  # TODO  refactor: change name once working again
         # self._instances_shape_dict = {}
@@ -36,11 +36,10 @@ class ClassProfiler(object):
         self._detect_minimal_iri = detect_minimal_iri
         self._examples_mode = examples_mode
         self._inverse_paths = inverse_paths
+        self._namespaces_dict = namespaces_dict if namespaces_dict is not None else {}
+        self._original_shape_map = original_shape_map
 
-        self._original_target_nodes = determine_original_target_nodes_if_needed(remove_empty_shapes=remove_empty_shapes,
-                                                                                original_target_classes=original_target_classes,
-                                                                                original_shape_map=original_shape_map,
-                                                                                shapes_namespace=shapes_namespace)
+        self._original_target_nodes = None # Will be filled during execution
 
         if detect_minimal_iri or examples_mode is not None:
             self._shape_feature_examples = ShapeExampleFeaturesDict(track_inverse_features=inverse_paths)
@@ -76,7 +75,8 @@ class ClassProfiler(object):
             log_msg(verbose=verbose,
                     msg="Mimimal IRIs detected...")
         return self._classes_shape_dict, self._class_counts, \
-            self._shape_feature_examples if (self._detect_minimal_iri or self._examples_mode is not None) else None
+            self._shape_feature_examples if (self._detect_minimal_iri or self._examples_mode is not None) else None,\
+            self._shape_names_dict
 
     def get_target_classes_dict(self):
         return self._instances_dict
@@ -169,6 +169,10 @@ class ClassProfiler(object):
     def _clean_class_profile(self):
         if not self._remove_empty_shapes:
             return
+        self._original_target_nodes = determine_original_target_nodes_if_needed(remove_empty_shapes=self._remove_empty_shapes,
+                                                                                original_target_classes=self._original_raw_target_classes,
+                                                                                original_shape_map=self._original_shape_map,
+                                                                                shape_names_dict=self._shape_names_dict)
         shapes_to_remove = self._detect_shapes_to_remove()
 
         while len(shapes_to_remove) != 0:

@@ -4,21 +4,23 @@ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX : <http://weso.es/DIfferentShapes#>
+PREFIX : <http://weso.es/shapes/>
 
 :Person
 {
-   foaf:name  xsd:string  ;
    rdf:type  [foaf:Person]  ;
-   foaf:familyName  xsd:string  ?;
-   foaf:age  xsd:integer  ?;
-   foaf:knows  @:Person  ?
+   ex:knows  @:Person_ex  ;
+   foaf:familyName  xsd:string  ;
+   foaf:name  xsd:string  ;
+   foaf:age  xsd:integer
 }
 
 
-:Document
+:Person_ex
 {
-   foaf:title  xsd:string  ;
-   rdf:type  [foaf:Document]  ;
-   foaf:depiction  xsd:string  ?
+   ex:age  xsd:integer  ;
+   ex:knows  @:Person  ;
+   ex:name  xsd:string  ;
+   ex:familyName  xsd:string  ;
+   rdf:type  [ex:Person]
 }

@@ -27,6 +27,7 @@ class AbstractShexingStrategy(object):
         self._all_compliant_mode = self._class_shexer._all_compliant_mode
         self._disable_exact_cardinality = self._class_shexer._disable_exact_cardinality
         self._allow_redundant_or = self._class_shexer._allow_redundant_or
+        self._shape_names_dict = self._class_shexer._shape_names_dict
 
         self._strategy_min_iri = AnnotateMinIriStrategy(class_shexer._class_min_iris_dict) \
             if class_shexer._detect_minimal_iri \
@@ -266,6 +267,12 @@ class AbstractShexingStrategy(object):
         if node_kind_str in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE]:
             return False
         return True
+
+
+    def _shape_name(self, class_key):
+        if class_key.startswith("<"):
+            return STARTING_CHAR_FOR_SHAPE_NAME + class_key
+        return f"{STARTING_CHAR_FOR_SHAPE_NAME}<{self._shape_names_dict[class_key]}>"
 
 class MergeableConstraints(object):
     """
