@@ -1,5 +1,5 @@
 from shexer.utils.shapes import build_shapes_name_for_class_uri
-from shexer.core.profiling.consts import POS_CLASSES, _S, _P, _O, POS_FEATURES_DIRECT, _ONE_TO_MANY, POS_FEATURES_INVERSE
+from shexer.core.profiling.consts import POS_CLASSES, _S, _P, _O, POS_FEATURES_DIRECT, _ONE_TO_MANY
 from shexer.model.IRI import IRI_ELEM_TYPE, IRI
 from shexer.model.bnode import BNode, BNODE_ELEM_TYPE
 
@@ -49,6 +49,12 @@ class AbstractFeatureDirectionStrategy(object):
                     self._c_shapes_dict[a_class] = {}
                     self._c_counts[a_class] = 0
                 self._c_counts[a_class] += 1
+                if a_class not in self._shape_names_dict:
+                    self._shape_names_dict[a_class] = \
+                        build_shapes_name_for_class_uri(class_uri=a_class,
+                                                        shapes_namespace=self._class_profiler._shapes_namespace,
+                                                        shape_names_dict=self._shape_names_dict,
+                                                        namespace_prefix_dict=self._namespaces_dict)
 
     def _annotate_direct_instance_features(self, an_instance):
         direct_feautres_3tuple = self._infer_direct_3tuple_features(an_instance)
@@ -68,7 +74,7 @@ class AbstractFeatureDirectionStrategy(object):
 
     def _infer_valid_cardinalities(self, a_property, a_cardinality):
         """
-        Special teratment for self._instantiation_property_str. If thats the property, we are targetting specific URIs
+        Special teratment for self._instantiation_property_str. If that's the property, we are targetting specific URIs
         instead of the type IRI.
         Cardinality will be always "1"
         :param a_property:
@@ -120,17 +126,17 @@ class AbstractFeatureDirectionStrategy(object):
                 for a_class in self._i_dict[str_elem][POS_CLASSES]]
 
     def _get_shape_name_for_a_class(self, a_class):
-        self._assign_shape_name_if_needed(a_class)
+        # self._assign_shape_name_if_needed(a_class)
         return self._shape_names_dict[a_class]
 
-    def _assign_shape_name_if_needed(self, a_class):
-        if a_class in self._shape_names_dict:
-            return
-        self._shape_names_dict[a_class] = \
-            build_shapes_name_for_class_uri(class_uri=a_class,
-                                            shapes_namespace=self._class_profiler._shapes_namespace,
-                                            shape_names_dict=self._shape_names_dict,
-                                            namespace_prefix_dict=self._namespaces_dict)
+    # def _assign_shape_name_if_needed(self, a_class):
+    #     if a_class in self._shape_names_dict:
+    #         return
+    #     self._shape_names_dict[a_class] = \
+    #         build_shapes_name_for_class_uri(class_uri=a_class,
+    #                                         shapes_namespace=self._class_profiler._shapes_namespace,
+    #                                         shape_names_dict=self._shape_names_dict,
+    #                                         namespace_prefix_dict=self._namespaces_dict)
 
     def _annotate_target_subject(self, a_triple):
         str_subj = a_triple[_S].iri

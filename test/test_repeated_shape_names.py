@@ -24,12 +24,14 @@ class TestRepeatedShapeNames(unittest.TestCase):
 ex:Jimmy a foaf:Person ;  
 	foaf:age "23"^^xsd:integer ;
 	foaf:name "Jimmy" ;
-	foaf:familyName "Jones" .
+	foaf:familyName "Jones" ;
+	ex:knows ex:Sarah .
 
 ex:Sarah a ex:Person ;  
 	ex:age 22 ;
 	ex:name "Sarah" ;
-	ex:familyName "Salem" .
+	ex:familyName "Salem" ;
+	ex:knows ex:Jimmy .
 
 """
 
