@@ -9,7 +9,6 @@ class DirectShexingStrategy(AbstractShexingStrategy):
         self._class_profile_dict = self._class_shexer._class_profile_dict
         self._shapes_namespace = self._class_shexer._shapes_namespace
         self._class_counts_dict = self._class_shexer._class_counts_dict
-        self._shape_names_dict = self._class_shexer._shape_names_dict
 
     def remove_statements_to_gone_shapes(self, shape, shape_names_to_remove):
         shape.direct_statements = self._statements_without_shapes_to_remove(original_statements=shape.direct_statements,
@@ -23,7 +22,7 @@ class DirectShexingStrategy(AbstractShexingStrategy):
 
     def _yield_base_shapes_direction_aware(self, acceptance_threshold):
         for a_class_key in self._class_profile_dict:
-            name = self._shape_names_dict[a_class_key]
+            name = self._shape_name(a_class_key)
             number_of_instances = float(self._class_counts_dict[a_class_key])
             statements = []
             for a_prop_key in self._class_profile_dict[a_class_key]:
