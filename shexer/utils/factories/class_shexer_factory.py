@@ -1,6 +1,8 @@
 from shexer.core.shexing.class_shexer import ClassShexer
 from shexer.core.shexing.class_shexer_fed_sources import ClassShexerFedSources
 from shexer.consts import RDF_TYPE, SHAPES_DEFAULT_NAMESPACE, RATIO_INSTANCES
+from shexer.utils.target_elements import tune_target_classes_if_needed
+from shexer.utils.dict import reverse_keys_and_values
 
 
 def get_class_shexer(class_counts,
@@ -24,7 +26,11 @@ def get_class_shexer(class_counts,
                      detect_minimal_iri=False,
                      class_min_iris=None,
                      allow_redundant_or=False,
-                     federated_sources=None):
+                     federated_sources=None,
+                     shape_names=None):
+
+    if original_target_classes is not None:
+        original_target_classes = tune_target_classes_if_needed(original_target_classes, reverse_keys_and_values(namespaces_dict))
 
     if federated_sources is None:
         return ClassShexer(
@@ -49,7 +55,8 @@ def get_class_shexer(class_counts,
             decimals=decimals,
             detect_minimal_iri=detect_minimal_iri,
             class_min_iris_dict=class_min_iris,
-            allow_redundant_or=allow_redundant_or
+            allow_redundant_or=allow_redundant_or,
+            shape_names_dict=shape_names
         )
     else:
         return ClassShexerFedSources(
@@ -75,5 +82,6 @@ def get_class_shexer(class_counts,
             detect_minimal_iri=detect_minimal_iri,
             class_min_iris_dict=class_min_iris,
             allow_redundant_or=allow_redundant_or,
-            fed_sources=federated_sources
+            fed_sources=federated_sources,
+            shape_names_dict=shape_names
         )

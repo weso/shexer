@@ -32,7 +32,8 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                        disable_endpoint_cache=None,
                        detect_minimal_iri=False,
                        examples_mode=None,
-                       federated_sources=None):
+                       federated_sources=None,
+                       shapes_namespace=None):
     yielder = get_triple_yielder(source_file=source_file,
                                  list_of_source_files=list_of_source_files,
                                  input_format=input_format,
@@ -73,7 +74,9 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                              remove_empty_shapes=remove_empty_shapes,
                              inverse_paths=inverse_paths,
                              detect_minimal_iri=detect_minimal_iri,
-                             examples_mode=examples_mode)
+                             examples_mode=examples_mode,
+                             namespaces_dict=namespaces_dict,
+                             shapes_namespace=shapes_namespace)
     else:
         return FederatedSourceClassProfiler(triples_yielder=yielder,
                                             instances_dict=target_classes_dict,
@@ -88,4 +91,6 @@ def get_class_profiler(target_classes_dict, source_file, list_of_source_files, i
                                             inverse_paths=inverse_paths,
                                             detect_minimal_iri=detect_minimal_iri,
                                             examples_mode=examples_mode,
-                                            list_of_federated_objects=federated_sources)
+                                            list_of_federated_objects=federated_sources,
+                                            namespaces_dict=namespaces_dict,
+                                            shapes_namespace=shapes_namespace)

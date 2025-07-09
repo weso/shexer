@@ -1,5 +1,4 @@
 from shexer.core.shexing.strategy.abstract_shexing_strategy import AbstractShexingStrategy
-from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.model.statement import Statement
 from shexer.model.shape import Shape
 
@@ -23,8 +22,7 @@ class DirectShexingStrategy(AbstractShexingStrategy):
 
     def _yield_base_shapes_direction_aware(self, acceptance_threshold):
         for a_class_key in self._class_profile_dict:
-            name = build_shapes_name_for_class_uri(class_uri=a_class_key,
-                                                   shapes_namespace=self._shapes_namespace)
+            name = self._shape_name(a_class_key)
             number_of_instances = float(self._class_counts_dict[a_class_key])
             statements = []
             for a_prop_key in self._class_profile_dict[a_class_key]:

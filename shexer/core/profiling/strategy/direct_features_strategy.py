@@ -1,4 +1,4 @@
-
+from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.core.profiling.strategy.abstract_feature_direction_strategy import AbstractFeatureDirectionStrategy
 from shexer.core.profiling.consts import _S, _P, _O, POS_CLASSES
 
@@ -35,6 +35,11 @@ class DirectFeaturesStrategy(AbstractFeatureDirectionStrategy):
             for a_class in self._original_raw_target_classes:
                 self._c_shapes_dict[a_class] = {}
                 self._c_counts[a_class] = 0
+                self._shape_names_dict[a_class] = \
+                    build_shapes_name_for_class_uri(class_uri=a_class,
+                                                    shapes_namespace=self._class_profiler._shapes_namespace,
+                                                    shape_names_dict=self._shape_names_dict,
+                                                    namespace_prefix_dict=self._namespaces_dict)
 
     def has_shape_annotated_features(self, shape_label):
         if shape_label not in self._c_shapes_dict:

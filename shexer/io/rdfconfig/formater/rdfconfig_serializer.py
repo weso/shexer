@@ -1,7 +1,6 @@
 from shexer.core.profiling.class_profiler import RDF_TYPE_STR
 from shexer.utils.file import load_whole_file_content
 from shexer.utils.uri import prefixize_uri_if_possible, get_prefix_of_namespace_if_it_exists
-from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 import os
 

@@ -1,3 +1,4 @@
+from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.core.profiling.strategy.abstract_feature_direction_strategy import AbstractFeatureDirectionStrategy
 from shexer.core.profiling.consts import _S, _P, _O, POS_FEATURES_INVERSE, POS_CLASSES
 from shexer.model.IRI import IRI_ELEM_TYPE
@@ -39,6 +40,12 @@ class IncludeReverseFeaturesStrategy(AbstractFeatureDirectionStrategy):
                     self._c_shapes_dict[a_class] = ({}, {})
                     self._c_counts[a_class] = 0
                 self._c_counts[a_class] += 1
+                if a_class not in self._shape_names_dict:
+                    self._shape_names_dict[a_class] = \
+                        build_shapes_name_for_class_uri(class_uri=a_class,
+                                                        shapes_namespace=self._class_profiler._shapes_namespace,
+                                                        shape_names_dict=self._shape_names_dict,
+                                                        namespace_prefix_dict=self._namespaces_dict)
 
     def init_original_targets(self):
         if self._original_raw_target_classes:
