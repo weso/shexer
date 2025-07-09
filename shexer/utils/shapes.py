@@ -19,15 +19,16 @@ def _candidate_name_for_class_uri(class_uri, shapes_namespace):
         last_piece = last_piece[:-1]
     if last_piece.startswith("<"):
         last_piece = last_piece[1:]
-    return STARTING_CHAR_FOR_SHAPE_NAME + "<" + shapes_namespace + last_piece + ">" if last_piece is not None else class_uri
+    return (shapes_namespace + last_piece) if last_piece is not None else class_uri
+    # return STARTING_CHAR_FOR_SHAPE_NAME + "<" + shapes_namespace + last_piece + ">" if last_piece is not None else class_uri
 
 def _refine_candidate_shape_name(candidate, class_uri, namespace_prefix_dict):
     prefix = get_prefix_of_namespace_if_it_exists(target_uri=class_uri,
-                                                  corners=True,
+                                                  corners=False,
                                                   namespaces_prefix_dict=namespace_prefix_dict)
     if prefix is None:
         return candidate
-    return f"{prefix}_{candidate}"
+    return f"{candidate}_{prefix}"
 
 
 def build_shapes_name_for_class_uri(class_uri, shapes_namespace, shape_names_dict, namespace_prefix_dict):
