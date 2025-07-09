@@ -2,6 +2,7 @@ from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.core.profiling.consts import POS_CLASSES, _S, _P, _O, POS_FEATURES_DIRECT, _ONE_TO_MANY
 from shexer.model.IRI import IRI_ELEM_TYPE, IRI
 from shexer.model.bnode import BNode, BNODE_ELEM_TYPE
+from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 
 class AbstractFeatureDirectionStrategy(object):
 
@@ -127,7 +128,7 @@ class AbstractFeatureDirectionStrategy(object):
 
     def _get_shape_name_for_a_class(self, a_class):
         # self._assign_shape_name_if_needed(a_class)
-        return self._shape_names_dict[a_class]
+        return f"{STARTING_CHAR_FOR_SHAPE_NAME}<{self._shape_names_dict[a_class]}>"
 
     # def _assign_shape_name_if_needed(self, a_class):
     #     if a_class in self._shape_names_dict:
