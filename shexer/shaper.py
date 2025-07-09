@@ -223,6 +223,7 @@ class Shaper(object):
         self._profile = None
         self._class_counts = None
         self._class_min_iris = None
+        self._shape_names = None
         self._class_shexer = None
         self._shape_list = None
 
@@ -318,7 +319,7 @@ class Shaper(object):
     def _launch_class_profiler(self, verbose=False):
         if self._class_profiler is None:
             self._class_profiler = self._build_class_profiler()
-        self._profile, self._class_counts, self._class_min_iris = self._class_profiler.profile_classes(verbose=verbose)
+        self._profile, self._class_counts, self._class_min_iris, self._shape_names = self._class_profiler.profile_classes(verbose=verbose)
 
     def _launch_class_shexer(self, acceptance_threshold, verbose=False):
         if self._class_shexer is None:
@@ -354,7 +355,8 @@ class Shaper(object):
                                 detect_minimal_iri=self._detect_minimal_iri,
                                 class_min_iris=self._class_min_iris,
                                 allow_redundant_or=self._allow_redundant_or,
-                                federated_sources=self._federated_sources)
+                                federated_sources=self._federated_sources,
+                                shape_names=self._shape_names)
 
     def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory, verbose):
         return get_shape_serializer(shapes_list=self._shape_list,

@@ -14,6 +14,7 @@ class AbstractFeatureDirectionStrategy(object):
         self._original_raw_target_classes = self._class_profiler._original_raw_target_classes
         self._detect_minimal_iri = self._class_profiler._detect_minimal_iri
         self._examples_mode = self._class_profiler._examples_mode
+        self._namespaces_dict = self._class_profiler._namespaces_dict
         if self._detect_minimal_iri or self._examples_mode is not None:
             self._shape_feature_examples = self._class_profiler._shape_feature_examples
 
@@ -127,7 +128,9 @@ class AbstractFeatureDirectionStrategy(object):
             return
         self._shape_names_dict[a_class] = \
             build_shapes_name_for_class_uri(class_uri=a_class,
-                                            shapes_namespace=self._class_profiler._shapes_namespace)
+                                            shapes_namespace=self._class_profiler._shapes_namespace,
+                                            shape_names_dict=self._shape_names_dict,
+                                            namespace_prefix_dict=self._namespaces_dict)
 
     def _annotate_target_subject(self, a_triple):
         str_subj = a_triple[_S].iri
