@@ -14,7 +14,7 @@ class StSerializerFactory(object):
 
     """
 
-    def __init__(self, freq_mode, decimals, instantiation_property_str, disable_comments):
+    def __init__(self, freq_mode, decimals, instantiation_property_str, disable_comments, frequency_property, namespaces_dict, comments_to_annotations):
         self._freq_serializer = self._build_freq_serializer(freq_mode=freq_mode,
                                                             decimals=decimals)
 
@@ -22,22 +22,34 @@ class StSerializerFactory(object):
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
                 is_inverse=False,
-                frequency_serializer=self._freq_serializer)
+                frequency_serializer=self._freq_serializer,
+                frequency_property=frequency_property,
+                namespaces_dict=namespaces_dict,
+                comments_to_annotations=comments_to_annotations)
         self._inverse_base = BaseStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
                 is_inverse=True,
-                frequency_serializer=self._freq_serializer)
+                frequency_serializer=self._freq_serializer,
+                frequency_property=frequency_property,
+                namespaces_dict=namespaces_dict,
+                comments_to_annotations=comments_to_annotations)
         self._direct_choice = FixedPropChoiceStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
                 is_inverse=False,
-                frequency_serializer=self._freq_serializer)
+                frequency_serializer=self._freq_serializer,
+                frequency_property=frequency_property,
+                namespaces_dict=namespaces_dict,
+                comments_to_annotations=comments_to_annotations)
         self._inverse_choice = FixedPropChoiceStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
                 is_inverse=True,
-                frequency_serializer=self._freq_serializer)
+                frequency_serializer=self._freq_serializer,
+                frequency_property=frequency_property,
+                namespaces_dict=namespaces_dict,
+                comments_to_annotations=comments_to_annotations)
 
     def get_base_serializer(self, is_inverse):
         return self._direct_base if not is_inverse else self._inverse_base

@@ -49,3 +49,6 @@ DEFAULT_NAMESPACES = {"http://example.org/": "ex",
             "http://www.w3.org/2001/XMLSchema#": "xsd",
             "http://xmlns.com/foaf/0.1/": "foaf"
             }
+
+# WESO-SHAPES-ONTO
+FREQ_PROP = "http://weso.es/shapes-onto/prop_usage_among_instances"

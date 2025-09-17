@@ -3,29 +3,45 @@ from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, \
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
+from shexer.utils.uri import prefixize_uri_if_possible
+from shexer.consts import FREQ_PROP
 
 _INVERSE_SENSE_SHEXC = "^"
+_ANNOTATION_BEGIN = "//"
+
 
 class BaseStatementSerializer(object):
 
-    def __init__(self, instantiation_property_str, frequency_serializer, disable_comments=False, is_inverse=False):
+    def __init__(self, instantiation_property_str, frequency_serializer, disable_comments=False, is_inverse=False,
+                 frequency_property=FREQ_PROP,
+                 namespaces_dict=None,
+                 comments_to_annotations=False):
         self._instantiation_property_str = instantiation_property_str
         self._disable_comments = disable_comments
         self._is_inverse = is_inverse
         self._frequency_serializer = frequency_serializer
+        self._frequency_property = frequency_property
+        self._namespaces_dict=namespaces_dict
+        self._comments_to_annotations = comments_to_annotations
 
-    def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape, namespaces_dict):
+    def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape):
         tuples_line_indent = []
-        st_property = BaseStatementSerializer.tune_token(a_statement.st_property, namespaces_dict)
+        st_property = BaseStatementSerializer.tune_token(a_statement.st_property, self._namespaces_dict)
         st_target_element = self.str_of_target_element(target_element=a_statement.st_type,
-                                                       st_property=a_statement.st_property,
-                                                       namespaces_dict=namespaces_dict)
+                                                       st_property=a_statement.st_property)
         cardinality = BaseStatementSerializer.cardinality_representation(
             statement=a_statement,
             out_of_comment=True)
-        result = self._sense_flag() + st_property + SPACES_GAP_BETWEEN_TOKENS + st_target_element + SPACES_GAP_BETWEEN_TOKENS + \
-                 cardinality + BaseStatementSerializer.closure_of_statement(is_last_statement_of_shape)
-
+        if self._comments_to_annotations:
+            annotations = self._build_constraint_annotations(a_statement)
+            result = self._sense_flag() + st_property + SPACES_GAP_BETWEEN_TOKENS + st_target_element + SPACES_GAP_BETWEEN_TOKENS + \
+                     cardinality + \
+                     SPACES_GAP_BETWEEN_TOKENS + annotations + SPACES_GAP_BETWEEN_TOKENS + \
+                     BaseStatementSerializer.closure_of_statement(is_last_statement_of_shape)
+        else:
+            result = self._sense_flag() + st_property + SPACES_GAP_BETWEEN_TOKENS + st_target_element + SPACES_GAP_BETWEEN_TOKENS + \
+                     cardinality + \
+                     BaseStatementSerializer.closure_of_statement(is_last_statement_of_shape)
         if a_statement.cardinality not in [KLEENE_CLOSURE, OPT_CARDINALITY] and not self._disable_comments:
             result += BaseStatementSerializer.adequate_amount_of_final_spaces(result)
             result += a_statement.probability_representation()
@@ -36,17 +52,24 @@ class BaseStatementSerializer(object):
 
         return tuples_line_indent
 
-    def str_of_target_element(self, target_element, st_property, namespaces_dict):
+    def _build_constraint_annotations(self, a_statement):
+        return SPACES_GAP_BETWEEN_TOKENS.join((_ANNOTATION_BEGIN,
+                                              prefixize_uri_if_possible(target_uri=self._frequency_property,
+                                                                        namespaces_prefix_dict=self._namespaces_dict,
+                                                                        corners=False),
+                                              str(a_statement.probability)
+                                              ))
+
+    def str_of_target_element(self, target_element, st_property):
         """
         Special treatment for instantiation_property. We build a value set with an specific URI
         :param target_element:
         :param st_property:
-        :param namespaces_dict:
         :return:
         """
         if st_property == self._instantiation_property_str:
-            return "[" + BaseStatementSerializer.tune_token(target_element, namespaces_dict) + "]"
-        return BaseStatementSerializer.tune_token(target_element, namespaces_dict)
+            return "[" + BaseStatementSerializer.tune_token(target_element, self._namespaces_dict) + "]"
+        return BaseStatementSerializer.tune_token(target_element, self._namespaces_dict)
 
     @staticmethod
     def tune_token(a_token, namespaces_dict):

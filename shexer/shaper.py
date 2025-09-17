@@ -2,7 +2,7 @@ from shexer.utils.obj_references import check_just_one_not_none
 
 from shexer.consts import SHEXC, SHACL_TURTLE, NT, TSV_SPO, N3, TURTLE, TURTLE_ITER, \
     RDF_XML, FIXED_SHAPE_MAP, JSON_LD, RDF_TYPE, SHAPES_DEFAULT_NAMESPACE, ZIP, GZ, XZ, \
-    ALL_EXAMPLES, CONSTRAINT_EXAMPLES, SHAPE_EXAMPLES
+    ALL_EXAMPLES, CONSTRAINT_EXAMPLES, SHAPE_EXAMPLES, FREQ_PROP
 from shexer.utils.factories.class_profiler_factory import get_class_profiler
 from shexer.utils.factories.instance_tracker_factory import get_instance_tracker
 from shexer.utils.factories.class_shexer_factory import get_class_shexer
@@ -64,7 +64,9 @@ class Shaper(object):
                  allow_redundant_or=False,
                  instances_cap=-1,
                  examples_mode=None,
-                 federated_sources=None  # could be a list
+                 federated_sources=None,  # could be a list
+                 comments_to_annotations=False,
+                 frequency_property=FREQ_PROP
                  ):
         """
 
@@ -196,6 +198,9 @@ class Shaper(object):
         self._shape_qualifiers_mode = shape_qualifiers_mode
         self._namespaces_for_qualifier_props = namespaces_for_qualifier_props
         self._shapes_namespace = shapes_namespace
+
+        self._comments_to_annotations=comments_to_annotations
+        self._frequency_property=frequency_property
 
         #The following two atts are used for optimizations
         self._built_remote_graph = get_remote_graph_if_needed(endpoint_url=url_endpoint,
@@ -356,7 +361,9 @@ class Shaper(object):
                                 class_min_iris=self._class_min_iris,
                                 allow_redundant_or=self._allow_redundant_or,
                                 federated_sources=self._federated_sources,
-                                shape_names=self._shape_names)
+                                shape_names=self._shape_names,
+                                frequency_property=self._frequency_property,
+                                comments_to_annotations=self._comments_to_annotations)
 
     def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory, verbose):
         return get_shape_serializer(shapes_list=self._shape_list,
