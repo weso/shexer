@@ -1,6 +1,6 @@
 import json
 
-from shexer.consts import RDF_TYPE, SHAPES_DEFAULT_NAMESPACE
+from shexer.consts import RDF_TYPE, SHAPES_DEFAULT_NAMESPACE, FREQ_PROP
 from shexer.core.shexing.strategy.direct_shexing_strategy import DirectShexingStrategy
 from shexer.core.shexing.strategy.direct_and_inverse_shexing_strategy import DirectAndInverseShexingStrategy
 from shexer.utils.target_elements import determine_original_target_nodes_if_needed
@@ -18,7 +18,8 @@ class ClassShexer(object):
                  allow_opt_cardinality=True, disable_exact_cardinality=False,
                  shapes_namespace=SHAPES_DEFAULT_NAMESPACE, inverse_paths=False,
                  decimals=-1, instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False,
-                 class_min_iris_dict=None, allow_redundant_or=False, shape_names_dict=None):
+                 class_min_iris_dict=None, allow_redundant_or=False, shape_names_dict=None, frequency_property=FREQ_PROP,
+                 comments_to_annotations=False):
         self._class_counts_dict = class_counts_dict
         self._class_profile_dict = class_profile_dict if class_profile_dict is not None else self._load_class_profile_dict_from_file(
             class_profile_json_file)
@@ -42,6 +43,8 @@ class ClassShexer(object):
         self._detect_minimal_iri = detect_minimal_iri
         self._allow_redundant_or = allow_redundant_or
         self._shape_names_dict = shape_names_dict if shape_names_dict is not None else {}
+        self._frequency_property = frequency_property
+        self._comments_to_annotations = comments_to_annotations
 
         self._original_target_nodes = determine_original_target_nodes_if_needed(remove_empty_shapes=remove_empty_shapes,
                                                                                 original_target_classes=original_target_classes,

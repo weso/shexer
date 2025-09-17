@@ -36,7 +36,10 @@ class AbstractShexingStrategy(object):
         self._statement_serializer_factory = StSerializerFactory(freq_mode=class_shexer._instances_report_mode,
                                                                  decimals=class_shexer._decimals,
                                                                  instantiation_property_str=self._instantiation_property_str,
-                                                                 disable_comments=self._disable_comments)
+                                                                 disable_comments=self._disable_comments,
+                                                                 frequency_property=self._class_shexer._frequency_property,
+                                                                 namespaces_dict=self._namespaces_dict,
+                                                                 comments_to_annotations=class_shexer._comments_to_annotations)
 
 
     def yield_base_shapes(self, acceptance_threshold):
@@ -99,7 +102,7 @@ class AbstractShexingStrategy(object):
         statement.cardinality = OPT_CARDINALITY if \
             self._allow_opt_cardinality and statement.cardinality == 1 \
             else KLEENE_CLOSURE
-        statement.probability = 1
+        # statement.probability = 1
 
 
     @staticmethod

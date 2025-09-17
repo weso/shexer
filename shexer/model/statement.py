@@ -18,8 +18,7 @@ class Statement(object):
     def get_tuples_to_serialize_line_indent_level(self, is_last_statement_of_shape, namespaces_dict):
         return self._serializer_object.\
             serialize_statement_with_indent_level(a_statement=self,
-                                                  is_last_statement_of_shape= is_last_statement_of_shape,
-                                                  namespaces_dict=namespaces_dict)
+                                                  is_last_statement_of_shape= is_last_statement_of_shape)
 
     def probability_representation(self):
         return self._serializer_object.probability_representation(self)
