@@ -12,9 +12,9 @@ _BASE_DIR = BASE_FILES + "annotations" + pth.sep  # We just need something with 
 
 
 class TestAnnotations(unittest.TestCase):
-    def test_all_classes_g1(self):
+    def test_all_classes_g1_with_freq_annotations(self):
         namespaces = default_namespaces()
-        namespaces["http://weso.es/shapes-onto/"] = "wf"
+        namespaces["http://weso.es/shexer/ontology/"] = "shexer"
         shaper = Shaper(
             graph_file_input=G1,
             namespaces_dict=namespaces,
@@ -23,7 +23,6 @@ class TestAnnotations(unittest.TestCase):
             disable_comments=True,
             comments_to_annotations=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
-        self.assertTrue(file_vs_str_tunned_comparison(file_path=G1_ALL_CLASSES_NO_COMMENTS,
+        self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "g1_freq_annotations.shex",
                                                       str_target=str_result))
 

@@ -102,7 +102,7 @@ class AbstractShexingStrategy(object):
         statement.cardinality = OPT_CARDINALITY if \
             self._allow_opt_cardinality and statement.cardinality == 1 \
             else KLEENE_CLOSURE
-        statement.probability = 1
+        # statement.probability = 1
 
 
     @staticmethod

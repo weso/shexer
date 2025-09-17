@@ -8,6 +8,7 @@ from shexer.consts import FREQ_PROP
 
 _INVERSE_SENSE_SHEXC = "^"
 _ANNOTATION_BEGIN = "//"
+_FREQUENCY_PATTERN = "{:.3f}"
 
 
 class BaseStatementSerializer(object):
@@ -57,9 +58,11 @@ class BaseStatementSerializer(object):
                                               prefixize_uri_if_possible(target_uri=self._frequency_property,
                                                                         namespaces_prefix_dict=self._namespaces_dict,
                                                                         corners=False),
-                                              str(a_statement.probability)
+                                              self._format_frequency(a_statement.probability)
                                               ))
 
+    def _format_frequency(self, frequency_raw_number):
+        return _FREQUENCY_PATTERN.format(frequency_raw_number)
     def str_of_target_element(self, target_element, st_property):
         """
         Special treatment for instantiation_property. We build a value set with an specific URI

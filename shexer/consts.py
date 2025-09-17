@@ -51,4 +51,4 @@ DEFAULT_NAMESPACES = {"http://example.org/": "ex",
             }
 
 # WESO-SHAPES-ONTO
-FREQ_PROP = "http://weso.es/shapes-onto/prop_usage_among_instances"
+FREQ_PROP = "http://weso.es/shexer/ontology/ratio_property_usage"
