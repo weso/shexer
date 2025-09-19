@@ -8,7 +8,8 @@ from shexer.utils.shapes import prefixize_shape_name_if_possible
 from shexer.io.shex.formater.consts import SPACES_LEVEL_INDENTATION
 from shexer.io.wikidata import wikidata_annotation
 from shexer.io.file import read_file
-from shexer.consts import RATIO_INSTANCES, ABSOLUTE_INSTANCES, MIXED_INSTANCES, ALL_EXAMPLES, SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES
+from shexer.consts import RATIO_INSTANCES, ABSOLUTE_INSTANCES, MIXED_INSTANCES, ALL_EXAMPLES, \
+    SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, EXAMPLE_CONSTRAINT_PROP
 
 from wlighter import SHEXC_FORMAT
 
@@ -24,7 +25,7 @@ class ShexSerializer(object):
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, disable_comments=False, wikidata_annotation=False,
                  instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_example_features=None,
-                 examples_mode=None, inverse_paths=False):
+                 examples_mode=None, inverse_paths=False, example_constraint_prop=EXAMPLE_CONSTRAINT_PROP):
         self._target_file = target_file
         self._shapes_list = shapes_list
         self._lines_buffer = []
@@ -38,6 +39,7 @@ class ShexSerializer(object):
         self._examples_mode = examples_mode
         self._shape_example_features = shape_example_features
         self._inverse_paths = inverse_paths
+        self._example_constraint_prop = example_constraint_prop
 
         self._string_result = ""
 
@@ -149,15 +151,23 @@ class ShexSerializer(object):
     def _add_statement_examples(self, a_shape):
         for a_statement in a_shape.yield_statements():
             if a_statement.st_property != self._instantiation_property_str:
-                comment = _EXAMPLE_CONSTRAINT_TEMPLATE.format(
-                    self._turn_str_comment_into_proper_rdf(
-                        self._get_node_constraint_example_no_inverse(a_shape, a_statement) if not self._inverse_paths
-                        else self._get_node_constraint_example_inverse(a_shape, a_statement)
-                    )
-                )
-
-                a_statement.add_comment(comment, insert_first=True)
-
+                a_statement.add_annotation(predicate=self._example_constraint_prop,
+                                           obj=self._get_node_constraint_example_no_inverse(
+                                               a_shape,
+                                               a_statement
+                                           ) if not self._inverse_paths
+                                           else
+                                           self._get_node_constraint_example_inverse(a_shape, a_statement),
+                                           insert_first=True
+                                           )
+                # comment = _EXAMPLE_CONSTRAINT_TEMPLATE.format(
+                #     self._turn_str_comment_into_proper_rdf(
+                #         self._get_node_constraint_example_no_inverse(a_shape, a_statement) if not self._inverse_paths
+                #         else self._get_node_constraint_example_inverse(a_shape, a_statement)
+                #     )
+                # )
+                #
+                # a_statement.add_comment(comment, insert_first=True)
 
     def _turn_str_comment_into_proper_rdf(self, str_object_to_transform):
         """
@@ -169,9 +179,10 @@ class ShexSerializer(object):
         if " " not in str_object_to_transform and "".count(":") == 1:
             return str_object_to_transform
         elif _INIT_URI_PATTERN.match(str_object_to_transform):
-            prefixed = prefixize_uri_if_possible(str_object_to_transform, namespaces_prefix_dict=self._namespaces_dict, corners=False)
+            prefixed = prefixize_uri_if_possible(str_object_to_transform, namespaces_prefix_dict=self._namespaces_dict,
+                                                 corners=False)
             if prefixed == str_object_to_transform:
-                return "<"+str_object_to_transform+">"
+                return "<" + str_object_to_transform + ">"
             else:
                 return prefixed
         else:
@@ -196,14 +207,13 @@ class ShexSerializer(object):
                                                   corners=False)
         return candidate
 
-
     def _serialize_shape_name(self, a_shape):
         self._write_line(
 
             prefixize_shape_name_if_possible(a_shape_name=a_shape.name,
                                              namespaces_prefix_dict=self._namespaces_dict) +
             self._minimal_iri(a_shape=a_shape) +
-            self._instance_count(a_shape) 
+            self._instance_count(a_shape)
         )
 
     def _serialize_example(self, a_shape):
@@ -211,10 +221,7 @@ class ShexSerializer(object):
             return ""
         candidate = self._shape_example_features.shape_example(shape_id=a_shape.class_uri)
         prefixed = prefixize_uri_if_possible(candidate, namespaces_prefix_dict=self._namespaces_dict, corners=False)
-        return _EXAMPLE_INSTANCE_TEMPLATE.format( prefixed if prefixed != candidate else f'<{candidate}>')
-
-
-
+        return _EXAMPLE_INSTANCE_TEMPLATE.format(prefixed if prefixed != candidate else f'<{candidate}>')
 
     def _minimal_iri(self, a_shape):
         if not self._detect_minimal_iri or self._shape_example_features.shape_min_iri(a_shape.class_uri) is None:

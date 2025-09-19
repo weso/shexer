@@ -52,3 +52,5 @@ DEFAULT_NAMESPACES = {"http://example.org/": "ex",
 
 # WESO-SHAPES-ONTO
 FREQ_PROP = "http://weso.es/shexer/ontology/ratio_property_usage"
+EXTRA_INFO_PROP = "http://www.w3.org/2000/01/rdf-schema#comment"
+EXAMPLE_CONSTRAINT_PROP = "http://weso.es/shexer/ontology/example_node_constraint"

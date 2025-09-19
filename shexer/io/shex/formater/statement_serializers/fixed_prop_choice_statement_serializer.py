@@ -28,12 +28,14 @@ class FixedPropChoiceStatementSerializer(BaseStatementSerializer):
         content_line += SPACES_GAP_BETWEEN_TOKENS + BaseStatementSerializer.cardinality_representation(
             statement=a_statement,
             out_of_comment=True)
+        if self._comments_to_annotations:
+            content_line += self._build_constraint_annotations(a_statement)
         content_line += ";" if not is_last_statement_of_shape else ""
         tuples_line_indent.append((content_line, 1))
 
-
-        for a_comment in a_statement.comments:
-            tuples_line_indent.append((a_comment, 4))
+        if not self._comments_to_annotations:
+            for a_comment in a_statement.comments:
+                tuples_line_indent.append((a_comment, 4))
         return tuples_line_indent
 
 

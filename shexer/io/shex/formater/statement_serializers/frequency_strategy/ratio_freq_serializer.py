@@ -8,10 +8,10 @@ class RatioFreqSerializer(BaseFrequencyStrategy):
         :param decimals: it indicates the number of decimals to use to express ratios.
                         When a negative number is provided, decimals won't be controlled
         """
-        self._decimals=decimals
+        self._decimals = decimals
         if decimals < 0:
             self.serialize_frequency = self._serialize_freq_unbounded
-        elif decimals ==0:
+        elif decimals == 0:
             self.serialize_frequency = self._serialize_freq_int
         else:
             self.serialize_frequency = self._serialize_freq_decimals
