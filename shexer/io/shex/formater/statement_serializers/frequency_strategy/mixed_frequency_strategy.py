@@ -4,7 +4,8 @@ from shexer.io.shex.formater.statement_serializers.frequency_strategy.ratio_freq
 
 class MixedFrequencyStrategy(BaseFrequencyStrategy):
 
-    def __init__(self, decimals=-1):
+    def __init__(self, frequency_ratio_property, frequency_absolute_property, namespaces_dict, decimals=-1):
+        super().__init__(frequency_ratio_property, frequency_absolute_property, namespaces_dict)
         self._abs_strategy = AbsFreqSerializer()
         self._ratio_strategy = RatioFreqSerializer(decimals=decimals)
 

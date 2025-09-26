@@ -1,16 +1,15 @@
 from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, \
     COMMENT_INI, TARGET_LINE_LENGHT, SPACES_GAP_FOR_FREQUENCY, KLEENE_CLOSURE, POSITIVE_CLOSURE, OPT_CARDINALITY, \
-    SHAPE_LINK_CHAR
+    SHAPE_LINK_CHAR, ANNOTATION_BEGIN
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
 from shexer.utils.uri import prefixize_uri_if_possible, add_corners_if_needed
-from shexer.utils.literal import
 from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP
 
+
+
 _INVERSE_SENSE_SHEXC = "^"
-_ANNOTATION_BEGIN = "//"
-_FREQUENCY_PATTERN = "{:.3f}"
 
 _EXTRA_ANNOT_TEMPLATE = '"{}"'
 
@@ -62,7 +61,8 @@ class BaseStatementSerializer(object):
 
     def _build_constraint_annotations(self, a_statement):
         # Frequency
-        freq_annotation = SPACES_GAP_BETWEEN_TOKENS.join((_ANNOTATION_BEGIN,
+        freq_annotations = None  # TODO
+        freq_annotation = SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
                                                           prefixize_uri_if_possible(target_uri=self._frequency_property,
                                                                                     namespaces_prefix_dict=self._namespaces_dict,
                                                                                     corners=False),
@@ -84,7 +84,7 @@ class BaseStatementSerializer(object):
             else:
                 annot_obj = an_annotation.obj
             extra.append(SPACES_GAP_BETWEEN_TOKENS.join((
-                _ANNOTATION_BEGIN,
+                ANNOTATION_BEGIN,
                 prefixize_uri_if_possible(target_uri=an_annotation.predicate,
                                           namespaces_prefix_dict=self._namespaces_dict,
                                           corners=False),
@@ -92,7 +92,7 @@ class BaseStatementSerializer(object):
             )))
         # COMMENTS TO ANNOTATIONS
         for a_comment in a_statement.comments:
-            extra.append(SPACES_GAP_BETWEEN_TOKENS.join((_ANNOTATION_BEGIN,
+            extra.append(SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
                                                          prefixize_uri_if_possible(target_uri=self._extra_infor_prop,
                                                                                    namespaces_prefix_dict=self._namespaces_dict,
                                                                                    corners=False),
@@ -100,8 +100,6 @@ class BaseStatementSerializer(object):
                                                          )))
         return "\n    ".join([freq_annotation] + extra)
 
-    def _format_frequency(self, frequency_raw_number):
-        return _FREQUENCY_PATTERN.format(frequency_raw_number)
 
     def str_of_target_element(self, target_element, st_property):
         """
