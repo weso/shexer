@@ -4,7 +4,8 @@ from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, \
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
-from shexer.utils.uri import prefixize_uri_if_possible, add_corners_if_needed
+from shexer.utils.uri import prefixize_uri_if_possible, serialize_as_triple_obj
+from shexer.utils.dict import reverse_keys_and_values
 from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP, ABSOLUTE_COUNT_PROP
 
 
@@ -31,6 +32,8 @@ class BaseStatementSerializer(object):
         self._comments_to_annotations = comments_to_annotations
         self._extra_infor_prop = extra_info_prop
         self._absolute_count_prop = absolute_count_prop
+
+        self._reverse_namespaces_dict = reverse_keys_and_values(namespaces_dict)
 
     def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape):
         tuples_line_indent = []
@@ -68,18 +71,9 @@ class BaseStatementSerializer(object):
         # Current annotations
         extra = []
         for an_annotation in a_statement.annotations:
-            if an_annotation.obj.startswith("http"):
-                annot_obj = add_corners_if_needed(
-                    prefixize_uri_if_possible(target_uri=an_annotation.predicate,
-                                              namespaces_prefix_dict=self._namespaces_dict,
-                                              corners=False))
-
-            elif an_annotation.obj.startswith("<http"):
-                annot_obj = prefixize_uri_if_possible(target_uri=an_annotation.predicate,
-                                                      namespaces_prefix_dict=self._namespaces_dict,
-                                                      corners=True)
-            else:
-                annot_obj = an_annotation.obj
+            annot_obj = serialize_as_triple_obj(sequence=an_annotation.obj,
+                                                namespaces_dict=self._reverse_namespaces_dict,
+                                                reverse_namespaces_dict=self._reverse_namespaces_dict)
             extra.append(SPACES_GAP_BETWEEN_TOKENS.join((
                 ANNOTATION_BEGIN,
                 prefixize_uri_if_possible(target_uri=an_annotation.predicate,
