@@ -5,7 +5,7 @@ from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLIT
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
 from shexer.utils.uri import prefixize_uri_if_possible, add_corners_if_needed
-from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP
+from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP, ABSOLUTE_COUNT_PROP
 
 
 
@@ -20,7 +20,8 @@ class BaseStatementSerializer(object):
                  frequency_property=FREQ_PROP,
                  namespaces_dict=None,
                  comments_to_annotations=False,
-                 extra_info_prop=EXTRA_INFO_PROP):
+                 extra_info_prop=EXTRA_INFO_PROP,
+                 absolute_count_prop=ABSOLUTE_COUNT_PROP):
         self._instantiation_property_str = instantiation_property_str
         self._disable_comments = disable_comments
         self._is_inverse = is_inverse
@@ -29,6 +30,7 @@ class BaseStatementSerializer(object):
         self._namespaces_dict = namespaces_dict
         self._comments_to_annotations = comments_to_annotations
         self._extra_infor_prop = extra_info_prop
+        self._absolute_count_prop = absolute_count_prop
 
     def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape):
         tuples_line_indent = []
@@ -61,14 +63,9 @@ class BaseStatementSerializer(object):
 
     def _build_constraint_annotations(self, a_statement):
         # Frequency
-        freq_annotations = None  # TODO
-        freq_annotation = SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
-                                                          prefixize_uri_if_possible(target_uri=self._frequency_property,
-                                                                                    namespaces_prefix_dict=self._namespaces_dict,
-                                                                                    corners=False),
-                                                          self._format_frequency(a_statement.probability)
-                                                          ))
-        # Actual annotations (examples)
+        freq_annotations = self._frequency_serializer.annotations_for_frequency(a_statement)
+
+        # Current annotations
         extra = []
         for an_annotation in a_statement.annotations:
             if an_annotation.obj.startswith("http"):
@@ -90,6 +87,7 @@ class BaseStatementSerializer(object):
                                           corners=False),
                 annot_obj
             )))
+
         # COMMENTS TO ANNOTATIONS
         for a_comment in a_statement.comments:
             extra.append(SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
@@ -98,7 +96,7 @@ class BaseStatementSerializer(object):
                                                                                    corners=False),
                                                          _EXTRA_ANNOT_TEMPLATE.format(a_comment[1:])
                                                          )))
-        return "\n    ".join([freq_annotation] + extra)
+        return "\n    ".join(freq_annotations + extra)
 
 
     def str_of_target_element(self, target_element, st_property):

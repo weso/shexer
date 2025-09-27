@@ -1,19 +1,22 @@
 from shexer.io.shex.formater.statement_serializers.base_statement_serializer import BaseStatementSerializer
 from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, KLEENE_CLOSURE, OPT_CARDINALITY
-from shexer.consts import FREQ_PROP
+from shexer.consts import FREQ_PROP, ABSOLUTE_COUNT_PROP, EXTRA_INFO_PROP
 
 
 class FixedPropChoiceStatementSerializer(BaseStatementSerializer):
 
     def __init__(self, instantiation_property_str, frequency_serializer, disable_comments=False, is_inverse=False,
-                 frequency_property=FREQ_PROP, namespaces_dict=None, comments_to_annotations=False):
+                 frequency_property=FREQ_PROP, namespaces_dict=None, comments_to_annotations=False,
+                 extra_info_prop=EXTRA_INFO_PROP, absolute_count_prop=ABSOLUTE_COUNT_PROP):
         super(FixedPropChoiceStatementSerializer, self).__init__(instantiation_property_str=instantiation_property_str,
                                                                  disable_comments=disable_comments,
                                                                  is_inverse=is_inverse,
                                                                  frequency_serializer=frequency_serializer,
                                                                  frequency_property=frequency_property,
                                                                  namespaces_dict=namespaces_dict,
-                                                                 comments_to_annotations=comments_to_annotations)
+                                                                 comments_to_annotations=comments_to_annotations,
+                                                                 extra_info_prop=extra_info_prop,
+                                                                 absolute_count_prop=absolute_count_prop)
 
     def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape):
         tuples_line_indent = []

@@ -39,7 +39,9 @@ class AbstractShexingStrategy(object):
                                                                  disable_comments=self._disable_comments,
                                                                  frequency_property=self._class_shexer._frequency_property,
                                                                  namespaces_dict=self._namespaces_dict,
-                                                                 comments_to_annotations=class_shexer._comments_to_annotations)
+                                                                 comments_to_annotations=class_shexer._comments_to_annotations,
+                                                                 extra_info_property=self._class_shexer._extra_info_property,
+                                                                 absolute_count_property=self._class_shexer._absolute_count_property)
 
 
     def yield_base_shapes(self, acceptance_threshold):

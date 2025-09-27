@@ -6,12 +6,15 @@ class MixedFrequencyStrategy(BaseFrequencyStrategy):
 
     def __init__(self, frequency_ratio_property, frequency_absolute_property, namespaces_dict, decimals=-1):
         super().__init__(frequency_ratio_property, frequency_absolute_property, namespaces_dict)
-        self._abs_strategy = AbsFreqSerializer()
-        self._ratio_strategy = RatioFreqSerializer(decimals=decimals)
+        self._abs_strategy = AbsFreqSerializer(frequency_ratio_property, frequency_absolute_property, namespaces_dict)
+        self._ratio_strategy = RatioFreqSerializer(frequency_ratio_property, frequency_absolute_property, namespaces_dict, decimals)
 
     def serialize_frequency(self, statement):
         # The abs_strategy return a trailing dot that we want to skip. That why I use slicing here
         return self._ratio_strategy.serialize_frequency(statement) + \
                " (" + self._abs_strategy.serialize_frequency(statement)[:-1] + ")."
 
+    def annotations_for_frequency(self, statement):
+        return self._ratio_strategy.annotations_for_frequency(statement) + \
+            self._abs_strategy.annotations_for_frequency(statement)
 

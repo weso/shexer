@@ -45,6 +45,7 @@ class RatioFreqSerializer(BaseFrequencyStrategy):
                                                                                     corners=False),
                                                           self._format_frequency(statement.probability)
                                                           ))
+        return [freq_annotation]
 
     def _format_frequency(self, frequency_raw_number):
         return _FREQUENCY_PATTERN.format(frequency_raw_number)
