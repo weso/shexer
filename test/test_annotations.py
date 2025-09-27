@@ -24,6 +24,7 @@ class TestAnnotations(unittest.TestCase):
             input_format=TURTLE,
             instances_report_mode=MIXED_INSTANCES,
             disable_comments=False,
+            detect_minimal_iri=True,
             comments_to_annotations=True)
         str_result = shaper.shex_graph(string_output=True)
         print(str_result)

@@ -53,7 +53,7 @@ class BaseStatementSerializer(object):
             result = self._sense_flag() + st_property + SPACES_GAP_BETWEEN_TOKENS + st_target_element + SPACES_GAP_BETWEEN_TOKENS + \
                      cardinality + \
                      BaseStatementSerializer.closure_of_statement(is_last_statement_of_shape)
-        if a_statement.cardinality not in [KLEENE_CLOSURE, OPT_CARDINALITY] and not self._disable_comments:
+        if a_statement.cardinality not in [KLEENE_CLOSURE, OPT_CARDINALITY] and not self._disable_comments and not self._comments_to_annotations:
             result += BaseStatementSerializer.adequate_amount_of_final_spaces(result)
             result += a_statement.probability_representation()
         tuples_line_indent.append((result, 1))

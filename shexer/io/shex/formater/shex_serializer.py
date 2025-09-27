@@ -9,13 +9,14 @@ from shexer.io.shex.formater.consts import SPACES_LEVEL_INDENTATION
 from shexer.io.wikidata import wikidata_annotation
 from shexer.io.file import read_file
 from shexer.consts import RATIO_INSTANCES, ABSOLUTE_INSTANCES, MIXED_INSTANCES, ALL_EXAMPLES, \
-    SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, EXAMPLE_CONSTRAINT_PROP
+    SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, EXAMPLE_CONSTRAINT_PROP, ABSOLUTE_COUNT_PROP
+from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS
 
 from wlighter import SHEXC_FORMAT
 
 _MODES_REPORT_INSTANCES = [ABSOLUTE_INSTANCES, MIXED_INSTANCES]
 _EXAMPLE_CONSTRAINT_TEMPLATE = '// rdfs:comment {} ;'
-_EXAMPLE_INSTANCE_TEMPLATE = " // rdfs:comment {}"
+_EXAMPLE_INSTANCE_TEMPLATE = " // {} {}"
 
 _INIT_URI_PATTERN = re.compile("http[s]?\://")
 
@@ -25,7 +26,8 @@ class ShexSerializer(object):
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, disable_comments=False, wikidata_annotation=False,
                  instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_example_features=None,
-                 examples_mode=None, inverse_paths=False, example_constraint_prop=EXAMPLE_CONSTRAINT_PROP):
+                 examples_mode=None, inverse_paths=False, example_constraint_prop=EXAMPLE_CONSTRAINT_PROP,
+                 comments_to_annotations=False, absolute_counts_prop=ABSOLUTE_COUNT_PROP):
         self._target_file = target_file
         self._shapes_list = shapes_list
         self._lines_buffer = []
@@ -40,6 +42,8 @@ class ShexSerializer(object):
         self._shape_example_features = shape_example_features
         self._inverse_paths = inverse_paths
         self._example_constraint_prop = example_constraint_prop
+        self._comments_to_annotations = comments_to_annotations
+        self._absolute_counts_property = absolute_counts_prop
 
         self._string_result = ""
 
@@ -220,8 +224,23 @@ class ShexSerializer(object):
         if self._examples_mode not in [ALL_EXAMPLES, SHAPE_EXAMPLES]:
             return ""
         candidate = self._shape_example_features.shape_example(shape_id=a_shape.class_uri)
-        prefixed = prefixize_uri_if_possible(candidate, namespaces_prefix_dict=self._namespaces_dict, corners=False)
-        return _EXAMPLE_INSTANCE_TEMPLATE.format(prefixed if prefixed != candidate else f'<{candidate}>')
+        prefixed_example = prefixize_uri_if_possible(candidate, namespaces_prefix_dict=self._namespaces_dict, corners=False)
+        prefixed_property = prefixize_uri_if_possible(self._example_constraint_prop, namespaces_prefix_dict=self._namespaces_dict, corners=False)
+        return _EXAMPLE_INSTANCE_TEMPLATE.format(
+            prefixed_property if prefixed_property != self._example_constraint_prop else f'<{self._example_constraint_prop}>',
+            prefixed_example if prefixed_example != candidate else f'<{candidate}>'
+        )
+
+    def _serialize_shape_count(self, a_shape):
+        if self._instances_report_mode not in [ABSOLUTE_INSTANCES, MIXED_INSTANCES]:
+            return ""
+        prefixed_property = prefixize_uri_if_possible(self._absolute_counts_property,
+                                                      namespaces_prefix_dict=self._namespaces_dict,
+                                                      corners=False)
+        return _EXAMPLE_INSTANCE_TEMPLATE.format(
+            prefixed_property if prefixed_property != self._absolute_counts_property else f'<{self._absolute_counts_property}>',
+            str(a_shape.n_instances)
+        )
 
     def _minimal_iri(self, a_shape):
         if not self._detect_minimal_iri or self._shape_example_features.shape_min_iri(a_shape.class_uri) is None:
@@ -231,14 +250,14 @@ class ShexSerializer(object):
     def _instance_count(self, a_shape):
         return "   # {} instance{}.".format(a_shape.n_instances,
                                             "" if a_shape.n_instances == 1 else "s") \
-            if self._instances_report_mode in _MODES_REPORT_INSTANCES and not self._disable_comments \
+            if self._instances_report_mode in _MODES_REPORT_INSTANCES and not self._disable_comments and not self._comments_to_annotations \
             else ""
 
     def _serialize_opening_of_rules(self):
         self._write_line("{")
 
     def _serialize_closure_of_rules(self, a_shape):
-        self._write_line("}" + self._serialize_example(a_shape=a_shape))
+        self._write_line("}" + self._serialize_example(a_shape=a_shape) + SPACES_GAP_BETWEEN_TOKENS +  self._serialize_shape_count(a_shape))
 
     def _serialize_shape_gap(self):
         self._write_line("")
