@@ -2,7 +2,7 @@ import unittest
 from shexer.shaper import Shaper
 from test.const import BASE_FILES, default_namespaces
 from test.t_utils import file_vs_str_tunned_comparison, file_vs_str_shex_exact_comparison_excluding_prefixes
-from shexer.consts import ALL_EXAMPLES, SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, ABSOLUTE_INSTANCES
+from shexer.consts import ALL_EXAMPLES, SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, ABSOLUTE_INSTANCES, EXAMPLE_CONFORMANCE_PROP
 import os.path as pth
 
 from shexer.consts import TURTLE
@@ -91,7 +91,7 @@ class TestExamplesMode(unittest.TestCase):
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue('// rdfs:comment "22" ;' in str_result)
         self.assertTrue(":Person   # 1 instance." in str_result)
-        self.assertTrue("} // rdfs:comment ex:Jimmy" in str_result)
+        self.assertTrue("// <{}> ex:Jimmy".format(EXAMPLE_CONFORMANCE_PROP) in str_result)
 
     def test_all_examples_no_instance_stats(self):
         shaper = Shaper(
@@ -104,8 +104,8 @@ class TestExamplesMode(unittest.TestCase):
             inverse_paths=False)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue('// rdfs:comment "22" ;' in str_result)
-        self.assertTrue("} // rdfs:comment ex:Jimmy" in str_result)
-        self.assertFalse(":Person   # 1 instance." in str_result)
+        self.assertTrue("// <{}> ex:Jimmy".format(EXAMPLE_CONFORMANCE_PROP) in str_result)
+        self.assertFalse("<{}>   # 1 instance." in str_result)
 
 
 

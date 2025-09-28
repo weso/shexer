@@ -2,12 +2,14 @@ from shexer.core.profiling.class_profiler import RDF_TYPE_STR
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from rdflib import Graph, Namespace, URIRef, RDF, BNode, XSD, Literal
 from shexer.model.statement import POSITIVE_CLOSURE, KLEENE_CLOSURE, OPT_CARDINALITY
-from shexer.utils.literal import XSD_NAMESPACE, LANG_STRING_TYPE
+from shexer.utils.literal import XSD_NAMESPACE, LANG_STRING_TYPE, decide_literal_type
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, LITERAL_ELEM_TYPE, DOT_ELEM_TYPE, BNODE_ELEM_TYPE
 from shexer.io.wikidata import wikidata_annotation
 from wlighter import TURTLE_FORMAT
-from shexer.model.node_selector import NodeSelectorSparql, NodeSelectorNoSparql
+from shexer.model.node_selector import NodeSelectorSparql
 from shexer.utils.log import log_msg
+from shexer.consts import RATIO_INSTANCES, EXAMPLE_CONFORMANCE_PROP, ABSOLUTE_COUNT_PROP, EXTRA_INFO_PROP, FREQ_PROP, \
+    SHAPE_EXAMPLES, ALL_EXAMPLES, MIXED_INSTANCES, ABSOLUTE_INSTANCES, CONSTRAINT_EXAMPLES
 
 _EXPECTED_SHAPE_BEGINING = STARTING_CHAR_FOR_SHAPE_NAME + "<"
 _EXPECTED_SHAPE_ENDING = ">"
@@ -56,7 +58,11 @@ class ShaclSerializer(object):
 
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, wikidata_annotation=False,
-                 detect_minimal_iri=False, shape_example_features=None, shape_map=None, verbose=False):
+                 detect_minimal_iri=False, shape_example_features=None, shape_map=None, verbose=False,
+                 instances_report_mode=RATIO_INSTANCES, examples_mode=None, inverse_paths=False,
+                 example_constraint_prop=EXAMPLE_CONFORMANCE_PROP, comments_to_annotations=False,
+                 absolute_counts_prop=ABSOLUTE_COUNT_PROP, extra_info_prop=EXTRA_INFO_PROP,
+                 frequency_prop=FREQ_PROP):
         self._target_file = target_file
         self._namespaces_dict = namespaces_dict if namespaces_dict is not None else {}
         self._shapes_list = shapes_list
@@ -67,6 +73,15 @@ class ShaclSerializer(object):
         self._shape_example_features = shape_example_features
         self._shape_map = shape_map
         self._verbose = verbose
+
+        self._instances_report_mode = instances_report_mode
+        self._examples_mode = examples_mode
+        self._inverse_paths = inverse_paths
+        self._example_constraint_prop = URIRef(example_constraint_prop)
+        self._generate_annotations = comments_to_annotations
+        self._absolute_counts_prop = URIRef(absolute_counts_prop)
+        self._extra_info_prop = URIRef(extra_info_prop)
+        self._frequency_prop = URIRef(frequency_prop)
 
         self._g_shapes = Graph()
 
@@ -128,8 +143,26 @@ class ShaclSerializer(object):
                               shape=shape)
         self._add_shape_constraints(shape=shape,
                                     r_shape_uri=r_shape_uri)
+        self._add_shape_annotations(shape=shape,
+                                    r_shape_uri=r_shape_uri)
 
+    def _add_shape_annotations(self, shape, r_shape_uri):
+        if not self._generate_annotations:
+            return
+        if self._examples_mode in [SHAPE_EXAMPLES, ALL_EXAMPLES]:
+            self._add_shape_example(shape, r_shape_uri)
+        if self._instances_report_mode in [MIXED_INSTANCES, ABSOLUTE_INSTANCES]:
+            self._add_shape_counts(shape, r_shape_uri)
 
+    def _add_shape_example(self, shape, r_shape_uri):
+        self._add_triple(r_shape_uri,
+                         self._example_constraint_prop,
+                         URIRef(self._shape_example_features.shape_example(shape_id=shape.class_uri)))
+
+    def _add_shape_counts(self, shape, r_shape_uri):
+        self._add_triple(r_shape_uri,
+                         self._absolute_counts_prop,
+                         Literal(shape.n_instances))
     def _add_target_class(self, shape, r_shape_uri):
         if self._shape_map is None:
             if shape.class_uri is not None:
@@ -152,18 +185,58 @@ class ShaclSerializer(object):
     def _add_shape_constraints(self, shape, r_shape_uri):
         for a_statement in shape.yield_statements():
             self._add_constraint(statement=a_statement,
-                                 r_shape_uri=r_shape_uri)
+                                 r_shape_uri=r_shape_uri,
+                                 shape=shape)
 
     def _is_instantiation_property(self, str_property):
         return str_property == self._instantiation_property_str
 
-    def _add_constraint(self, statement, r_shape_uri):
+    def _add_constraint(self, statement, r_shape_uri, shape):
+        r_constraint_node = self._generate_bnode()
         if self._is_instantiation_property(statement.st_property):
             self._add_instantiation_constraint(statement=statement,
-                                               r_shape_uri=r_shape_uri)
+                                               r_shape_uri=r_shape_uri,
+                                               r_constraint_node=r_constraint_node)
         else:
             self._add_regular_constraint(statement=statement,
-                                         r_shape_uri=r_shape_uri)
+                                         r_shape_uri=r_shape_uri,
+                                         r_constraint_node=r_constraint_node,
+                                         shape=shape)
+
+        if not self._generate_annotations:
+            return
+        if self._instances_report_mode in [MIXED_INSTANCES, RATIO_INSTANCES]:
+            self._add_constraint_ratio_annotation(statement, r_constraint_node)
+        if self._instances_report_mode in [MIXED_INSTANCES, ABSOLUTE_INSTANCES]:
+            self._add_constraint_absolutes_annotation(statement, r_constraint_node)
+
+    def _add_constraint_ratio_annotation(self, statement, r_constraint_node):
+        self._add_triple(r_constraint_node,
+                         self._frequency_prop,
+                         Literal(statement.probability, datatype=XSD.decimal))
+
+    def _add_constraint_absolutes_annotation(self, statement, r_constraint_node):
+        self._add_triple(r_constraint_node,
+                         self._absolute_counts_prop,
+                         Literal(statement.n_occurences))
+
+    def _add_constraint_example(self, statement, r_constraint_node, shape):
+        triple_obj = self._get_example_of_triple_obj(statement, shape)
+        self._add_triple(r_constraint_node,
+                         self._example_constraint_prop,
+                         triple_obj)
+
+    def _get_example_of_triple_obj(self, statement, shape):
+        if self._inverse_paths:
+            candidate = self._shape_example_features.get_constraint_example(shape_id=shape.class_uri,
+                                                                            prop=statement.st_property,
+                                                                            inverse=statement.is_inverse)
+        else:
+            candidate = self._shape_example_features.get_constraint_example(shape_id=shape.class_uri,
+                                                                            prop=statement.st_property)
+        if candidate.startswith("http://"):
+            return URIRef(candidate)
+        return Literal(candidate, datatype=decide_literal_type(candidate))
 
     def _add_exactly_one_cardinality(self, r_constraint_node):
         self._add_min_occurs(r_constraint_node=r_constraint_node,
@@ -178,8 +251,7 @@ class ShaclSerializer(object):
         self._add_triple(list_seed_node, RDF.first, target_node)
         self._add_triple(list_seed_node, RDF.rest, RDF.nil)
 
-    def _add_instantiation_constraint(self, statement, r_shape_uri):
-        r_constraint_node = self._generate_bnode()
+    def _add_instantiation_constraint(self, statement, r_shape_uri, r_constraint_node):
         self._add_bnode_property(r_shape_uri=r_shape_uri,
                                  r_constraint_node=r_constraint_node)
         self._add_direct_path(statement=statement,
@@ -188,8 +260,7 @@ class ShaclSerializer(object):
         self._add_in_instance(statement=statement,
                               r_constraint_node=r_constraint_node)
 
-    def _add_regular_constraint(self, statement, r_shape_uri):
-        r_constraint_node = self._generate_bnode()
+    def _add_regular_constraint(self, statement, r_shape_uri, r_constraint_node, shape):
         self._add_bnode_property(r_shape_uri=r_shape_uri,
                                  r_constraint_node=r_constraint_node)
         self._add_node_type(statement=statement,
@@ -198,6 +269,17 @@ class ShaclSerializer(object):
                               r_constraint_node=r_constraint_node)
         self._add_path(statement=statement,
                        r_constraint_node=r_constraint_node)
+        if self._generate_annotations:
+            self._add_statement_comments(statement=statement,
+                                         r_constraint_node=r_constraint_node)
+            if self._examples_mode in [ALL_EXAMPLES, CONSTRAINT_EXAMPLES]:
+                self._add_constraint_example(statement, r_constraint_node, shape)
+
+    def _add_statement_comments(self, statement, r_constraint_node):
+        for a_comment in statement.comments:
+            self._add_triple(r_constraint_node,
+                             self._extra_info_prop,
+                             Literal(a_comment))
 
     def _add_path(self, statement, r_constraint_node):
         if not statement.is_inverse:

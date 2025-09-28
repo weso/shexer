@@ -1,0 +1,25 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:Jimmy a foaf:Person ;  # Complete
+	foaf:age 22 ;
+	foaf:name "Jimmy" ;
+	foaf:familyName "Jones" ;
+	foaf:knows ex:Bella .
+
+ex:Sarah a foaf:Person ;  # Complete implicit type for age. Missing one prop
+	foaf:age 22 ;
+	foaf:familyName "Jones" ;
+	foaf:name "Jimmy" .
+
+ex:Bella a foaf:Person ;  # Missing 2 props
+    foaf:name "Jimmy" ;
+	foaf:age 22 .
+
+ex:David a foaf:Person ;  # Missing 3 props
+    foaf:age 22 .
+
+ex:Linda a foaf:Person .  # Missing all props

@@ -14,9 +14,13 @@ class StSerializerFactory(object):
 
     """
 
-    def __init__(self, freq_mode, decimals, instantiation_property_str, disable_comments, frequency_property, namespaces_dict, comments_to_annotations):
+    def __init__(self, freq_mode, decimals, instantiation_property_str, disable_comments, frequency_property,
+                 namespaces_dict, comments_to_annotations, extra_info_property, absolute_count_property):
         self._freq_serializer = self._build_freq_serializer(freq_mode=freq_mode,
-                                                            decimals=decimals)
+                                                            decimals=decimals,
+                                                            freq_prop=frequency_property,
+                                                            abs_prop=absolute_count_property,
+                                                            namespaces_dict=namespaces_dict)
 
         self._direct_base = BaseStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
@@ -25,7 +29,9 @@ class StSerializerFactory(object):
                 frequency_serializer=self._freq_serializer,
                 frequency_property=frequency_property,
                 namespaces_dict=namespaces_dict,
-                comments_to_annotations=comments_to_annotations)
+                comments_to_annotations=comments_to_annotations,
+                extra_info_prop=extra_info_property,
+                absolute_count_prop=absolute_count_property)
         self._inverse_base = BaseStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
@@ -33,7 +39,9 @@ class StSerializerFactory(object):
                 frequency_serializer=self._freq_serializer,
                 frequency_property=frequency_property,
                 namespaces_dict=namespaces_dict,
-                comments_to_annotations=comments_to_annotations)
+                comments_to_annotations=comments_to_annotations,
+                extra_info_prop=extra_info_property,
+                absolute_count_prop=absolute_count_property)
         self._direct_choice = FixedPropChoiceStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
@@ -41,7 +49,9 @@ class StSerializerFactory(object):
                 frequency_serializer=self._freq_serializer,
                 frequency_property=frequency_property,
                 namespaces_dict=namespaces_dict,
-                comments_to_annotations=comments_to_annotations)
+                comments_to_annotations=comments_to_annotations,
+                extra_info_prop=extra_info_property,
+                absolute_count_prop=absolute_count_property)
         self._inverse_choice = FixedPropChoiceStatementSerializer(
                 instantiation_property_str=instantiation_property_str,
                 disable_comments=disable_comments,
@@ -49,7 +59,9 @@ class StSerializerFactory(object):
                 frequency_serializer=self._freq_serializer,
                 frequency_property=frequency_property,
                 namespaces_dict=namespaces_dict,
-                comments_to_annotations=comments_to_annotations)
+                comments_to_annotations=comments_to_annotations,
+                extra_info_prop=extra_info_property,
+                absolute_count_prop=absolute_count_property)
 
     def get_base_serializer(self, is_inverse):
         return self._direct_base if not is_inverse else self._inverse_base
@@ -57,13 +69,22 @@ class StSerializerFactory(object):
     def get_choice_serializer(self, is_inverse):
         return self._direct_choice if not is_inverse else self._inverse_choice
 
-    def _build_freq_serializer(self, freq_mode, decimals):
+    def _build_freq_serializer(self, freq_mode, decimals, namespaces_dict, freq_prop, abs_prop):
         if freq_mode == RATIO_INSTANCES:
-            return RatioFreqSerializer(decimals=decimals)
+            return RatioFreqSerializer(decimals=decimals,
+                                       namespaces_dict=namespaces_dict,
+                                       frequency_ratio_property=freq_prop,
+                                       frequency_absolute_property=abs_prop)
         elif freq_mode == ABSOLUTE_INSTANCES:
-            return AbsFreqSerializer()
+            return AbsFreqSerializer(namespaces_dict=namespaces_dict,
+                                     frequency_ratio_property=freq_prop,
+                                     frequency_absolute_property=abs_prop)
         elif freq_mode == MIXED_INSTANCES:
-            return MixedFrequencyStrategy(decimals=decimals)
+            return MixedFrequencyStrategy(decimals=decimals,
+                                          namespaces_dict=namespaces_dict,
+                                          frequency_ratio_property=freq_prop,
+                                          frequency_absolute_property=abs_prop
+                                          )
         else:
             raise ValueError("Unrecognized frequency strategy for serialization. "
                              "Check you used a valid value in the instances_report_mode param")
