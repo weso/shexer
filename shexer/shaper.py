@@ -397,9 +397,9 @@ class Shaper(object):
                                     shape_map_raw=self._shape_map_raw,
                                     instance_tracker=self._instance_tracker,
                                     verbose=verbose,
-                                    example_constraint_prop=self._example_conformance_prop,
+                                    example_conformance_prop=self._example_conformance_prop,
                                     absolute_counts_prop=self._absolute_counts_prop,
-                                    comments_to_annotations=self._comments_to_annotations,
+                                    generate_annotations=self._comments_to_annotations,
                                     extra_info_prop=self._extra_info_property,
                                     frequency_prop=self._frequency_property)
 

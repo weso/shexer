@@ -71,6 +71,8 @@ sheXer includes a package to deploy a web service exposing sheXer with a REST AP
 
 * **Extraction of shapes for federation**. You can configure sheXer to extract information form several endpoints whose URIs are connected. sheXer will extract shapes combining information of both ends which can be helpful for making federated queries.
 
+* **Machine-readable annotations**. frequencies, examples, instance counts, and, in general, any extra information otu or mere shapes and constraints, can be provided in machine-readable RDF annotations.
+
 
 ## Experimental results
 
@@ -229,6 +231,11 @@ Again, all these params have a default value and you don't need to worry about t
 * instances_report_mode (default, const.RATIO_INSTANCES). With this parameter, you can configure how is the information about instances complying to each expression shown. By default, sheXer shows a percetage of instances. If you set this parameter to const.ABSOLUTE_INSTANCES, then the comments will contain the exact number of complying instances instead of the ratio. sheXer will write a comment next to the shape label so you can also know how many instances were used to extract a shape. If you set the parameter to const.MIXED_INSTANCES, the comments will contain both relative and absolute information.
 * decimals (default: -1). With this parameter you can configure the number of decimals to be used when writing ratios in comments. A negative numnber means that ratios will be written using its top precision. If you set this parameter to a natural number (including 0), then such number will be the number of decimals used. sheXer will round (not truncate) the original ratio to that precision.
 * examples_mode (default: None). You can set this parameter to one of the values included in the '#EXAMPLES' section of shexer.consts. If you choose SHAPE_EXAMPLES, sheXer will write the URI of an instance matching each shape extracted as a comment next to the shape label. If you choose CONSTRAINT_EXAMPLES, sheXer will write a comment including an example of node constraint matching each triple constraint of each shape (each value is used by an instance example with the triple constraint's property). If you choose ALL_EXAMPLES, sheXer will do both things. When the value of this parameter is None, sheXer will not serialize examples in comments.
+* generate_annotations (default: False). When set to true, information related to statistics, examples or extra annotations will be provided in machine-readable RDF instead of inline comments.
+* example_conformance_prop: Set this parameter to the URI you want to use as property to express the relation between a shape/constraint and a conforming node found in the input.
+* absolute_counts_prop: Set this parameter to the URI you want to use as property to express the number of conforming elements with a certain shape/constraint.
+* extra_info_prop: Set this parameter to the URI you want to use as property to express extra statistical comments associated to extracted constraints.
+* frequency_prop: Set this parameter to the URI you want to use as property to express the usage ratio of a certain property among the explored instances.
 
 
 ### Method __shex\_graph__
