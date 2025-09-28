@@ -9,4 +9,4 @@ PREFIX : <http://weso.es/shapes/>
 :Person   # 1 instance.
 {
    rdf:type  [foaf:Person]                                     # 1 instance.
-} // rdfs:comment ex:Jimmy
+} // <http://weso.es/shexer/ontology/example_node_constraint> ex:Jimmy   // <http://weso.es/shexer/ontology/total_conforming_instances> 1

@@ -13,4 +13,4 @@ PREFIX : <http://weso.es/shapes/>
             # 66.66666666666666 % (2 instances). obj: xsd:string. Cardinality: {1}
    foaf:familyName  xsd:string  ?
             # 33.33333333333333 % (1 instance). obj: xsd:string. Cardinality: {1}
-}
+}   // <http://weso.es/shexer/ontology/total_conforming_instances> 3

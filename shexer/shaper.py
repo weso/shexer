@@ -66,7 +66,7 @@ class Shaper(object):
                  instances_cap=-1,
                  examples_mode=None,
                  federated_sources=None,  # could be a list
-                 comments_to_annotations=False,
+                 generate_annotations=False,
                  frequency_property=FREQ_PROP,
                  absolute_counts_property=ABSOLUTE_COUNT_PROP,
                  example_conformance_property=EXAMPLE_CONFORMANCE_PROP,
@@ -180,7 +180,6 @@ class Shaper(object):
         self._instances_cap = instances_cap
 
         self._remove_empty_shapes=remove_empty_shapes
-        self._disable_comments = disable_comments
         self._disable_or_statements = disable_or_statements
         self._allow_opt_cardinality = allow_opt_cardinality
         self._disable_exact_cardinality = disable_exact_cardinality
@@ -203,7 +202,13 @@ class Shaper(object):
         self._namespaces_for_qualifier_props = namespaces_for_qualifier_props
         self._shapes_namespace = shapes_namespace
 
-        self._comments_to_annotations = comments_to_annotations
+        self._comments_to_annotations = generate_annotations
+        self._disable_comments = disable_comments
+        if generate_annotations:
+            self._disable_comments = False                                  # If annotations are required, internally,
+                                                                            # comments gathering should be enabled.
+                                                                            # No consequence for the output. Info
+                                                                            # will be provided with annotations anyhow
         self._frequency_property = frequency_property
         self._example_conformance_prop = example_conformance_property
         self._absolute_counts_prop = absolute_counts_property
@@ -226,8 +231,6 @@ class Shaper(object):
                                                         input_format=self._input_format,
                                                         source_file_graph=self._graph_file_input,
                                                         limit_remote_instances=self._limit_remote_instances)
-
-
 
         self._instance_tracker = None
         self._target_classes_dict = None

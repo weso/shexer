@@ -153,17 +153,29 @@ class ShexSerializer(object):
         self._add_statement_examples(a_shape)
 
     def _add_statement_examples(self, a_shape):
-        for a_statement in a_shape.yield_statements():
-            if a_statement.st_property != self._instantiation_property_str:
-                a_statement.add_annotation(predicate=self._example_constraint_prop,
-                                           obj=self._get_node_constraint_example_no_inverse(
-                                               a_shape,
-                                               a_statement
-                                           ) if not self._inverse_paths
-                                           else
-                                           self._get_node_constraint_example_inverse(a_shape, a_statement),
-                                           insert_first=True
-                                           )
+        if self._comments_to_annotations:
+            for a_statement in a_shape.yield_statements():
+                if a_statement.st_property != self._instantiation_property_str:
+                    a_statement.add_annotation(predicate=self._example_constraint_prop,
+                                               obj=self._get_node_constraint_example_no_inverse(
+                                                   a_shape,
+                                                   a_statement
+                                               ) if not self._inverse_paths
+                                               else
+                                               self._get_node_constraint_example_inverse(a_shape, a_statement),
+                                               insert_first=True
+                                               )
+        else:
+            for a_statement in a_shape.yield_statements():
+                if a_statement.st_property != self._instantiation_property_str:
+                    comment = _EXAMPLE_CONSTRAINT_TEMPLATE.format(
+                        self._turn_str_comment_into_proper_rdf(
+                            self._get_node_constraint_example_no_inverse(a_shape, a_statement) if not self._inverse_paths
+                            else self._get_node_constraint_example_inverse(a_shape, a_statement)
+                        )
+                    )
+
+                    a_statement.add_comment(comment, insert_first=True)
                 # comment = _EXAMPLE_CONSTRAINT_TEMPLATE.format(
                 #     self._turn_str_comment_into_proper_rdf(
                 #         self._get_node_constraint_example_no_inverse(a_shape, a_statement) if not self._inverse_paths
@@ -232,7 +244,7 @@ class ShexSerializer(object):
         )
 
     def _serialize_shape_count(self, a_shape):
-        if self._instances_report_mode not in [ABSOLUTE_INSTANCES, MIXED_INSTANCES]:
+        if self._instances_report_mode not in [ABSOLUTE_INSTANCES, MIXED_INSTANCES] or self._disable_comments:
             return ""
         prefixed_property = prefixize_uri_if_possible(self._absolute_counts_property,
                                                       namespaces_prefix_dict=self._namespaces_dict,
@@ -248,10 +260,11 @@ class ShexSerializer(object):
         return "  [<{}>~]  AND".format(self._shape_example_features.shape_min_iri(a_shape.class_uri))
 
     def _instance_count(self, a_shape):
-        return "   # {} instance{}.".format(a_shape.n_instances,
+        result = "   # {} instance{}.".format(a_shape.n_instances,
                                             "" if a_shape.n_instances == 1 else "s") \
             if self._instances_report_mode in _MODES_REPORT_INSTANCES and not self._disable_comments and not self._comments_to_annotations \
             else ""
+        return result
 
     def _serialize_opening_of_rules(self):
         self._write_line("{")

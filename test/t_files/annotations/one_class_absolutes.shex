@@ -1,0 +1,21 @@
+PREFIX ex: <http://example.org/>
+PREFIX xml: <http://www.w3.org/XML/1998/namespace/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX shexer: <http://weso.es/shexer/ontology/>
+PREFIX : <http://weso.es/shapes/>
+
+:Person
+{
+   rdf:type  [foaf:Person]    //  shexer:total_conforming_instances  5  ;
+   foaf:age  xsd:integer  ?  //  shexer:total_conforming_instances  4
+    //  rdfs:comment  " 4 instances. obj: xsd:integer. Cardinality: {1}"  ;
+   foaf:name  xsd:string  ?  //  shexer:total_conforming_instances  3
+    //  rdfs:comment  " 3 instances. obj: xsd:string. Cardinality: {1}"  ;
+   foaf:familyName  xsd:string  ?  //  shexer:total_conforming_instances  2
+    //  rdfs:comment  " 2 instances. obj: xsd:string. Cardinality: {1}"  ;
+   foaf:knows  @:Person  ?  //  shexer:total_conforming_instances  1
+    //  rdfs:comment  " 1 instance. obj: @:Person. Cardinality: {1}"
+}   // shexer:total_conforming_instances 5

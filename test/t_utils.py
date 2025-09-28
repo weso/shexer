@@ -220,6 +220,18 @@ def file_vs_str_exact_comparison(file_path, target_str):
     with open(file_path, "r") as in_stream:
         return in_stream.read().strip() == target_str.strip()
 
+def file_vs_str_strip_comparison(file_path, target_str):
+    with open(file_path, "r") as in_stream:
+        content = in_stream.read().strip().split("\n")
+        target_strip = target_str.strip().split("\n")
+        if len(content) != len(target_strip):
+            return False
+        for i in range(len(content)):
+            if content[i].strip() != target_strip[i].strip():
+                return False
+    return True
+
+
 
 def filter_prefixes_str_shex(target_str):
     result = []
