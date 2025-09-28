@@ -4,7 +4,7 @@ from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, \
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
-from shexer.utils.uri import prefixize_uri_if_possible, serialize_as_triple_obj, add_corners_if_needed
+from shexer.utils.uri import prefixize_uri_if_possible, serialize_as_triple_obj, add_corners_if_it_is_an_uri
 from shexer.utils.dict import reverse_keys_and_values
 from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP, ABSOLUTE_COUNT_PROP
 
@@ -76,7 +76,7 @@ class BaseStatementSerializer(object):
                                                 reverse_namespaces_dict=self._reverse_namespaces_dict)
             extra.append(SPACES_GAP_BETWEEN_TOKENS.join((
                 ANNOTATION_BEGIN,
-                add_corners_if_needed(prefixize_uri_if_possible(target_uri=an_annotation.predicate,
+                add_corners_if_it_is_an_uri(prefixize_uri_if_possible(target_uri=an_annotation.predicate,
                                           namespaces_prefix_dict=self._namespaces_dict,
                                           corners=False)),
                 annot_obj
@@ -85,7 +85,7 @@ class BaseStatementSerializer(object):
         # COMMENTS TO ANNOTATIONS
         for a_comment in a_statement.comments:
             extra.append(SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
-                                                         add_corners_if_needed(prefixize_uri_if_possible(target_uri=self._extra_infor_prop,
+                                                         add_corners_if_it_is_an_uri(prefixize_uri_if_possible(target_uri=self._extra_infor_prop,
                                                                                    namespaces_prefix_dict=self._namespaces_dict,
                                                                                    corners=False)),
                                                          _EXTRA_ANNOT_TEMPLATE.format(a_comment[1:])

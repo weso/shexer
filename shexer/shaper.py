@@ -371,7 +371,7 @@ class Shaper(object):
                                 shape_names=self._shape_names,
                                 frequency_property=self._frequency_property,
                                 comments_to_annotations=self._comments_to_annotations,
-                                absolute_counts_prop=ABSOLUTE_COUNT_PROP,
+                                absolute_counts_prop=self._absolute_counts_prop,
                                 extra_info_property=self._extra_info_property)
 
     def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory, verbose):
