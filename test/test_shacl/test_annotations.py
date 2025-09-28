@@ -3,9 +3,9 @@ from shexer.shaper import Shaper
 from shexer.utils.uri import prefixize_uri_if_possible, add_corners_if_it_is_an_uri
 from shexer.utils.dict import reverse_keys_and_values
 from test.const import G1, BASE_FILES, default_namespaces
-from test.t_utils import file_vs_str_tunned_comparison, file_vs_str_strip_comparison
+from test.t_utils import graph_comparison_file_vs_str
 from shexer.consts import ALL_EXAMPLES, MIXED_INSTANCES, ABSOLUTE_INSTANCES, RATIO_INSTANCES, CONSTRAINT_EXAMPLES, \
-    SHAPE_EXAMPLES, EXAMPLE_CONFORMANCE_PROP, ABSOLUTE_COUNT_PROP, EXTRA_INFO_PROP, FREQ_PROP
+    SHAPE_EXAMPLES, EXAMPLE_CONFORMANCE_PROP, ABSOLUTE_COUNT_PROP, EXTRA_INFO_PROP, FREQ_PROP, SHACL_TURTLE
 import os.path as pth
 
 from shexer.consts import TURTLE, TURTLE_ITER
@@ -56,9 +56,9 @@ class TestAnnotations(unittest.TestCase):
             disable_comments=False,
             generate_annotations=False
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "g1_comments_no_annot.shex",
-                                                      str_target=str_result))
+        str_result = shaper.shex_graph(string_output=True, output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "g1_comments_no_annot.ttl",
+                                                     str_target=str_result))
 
     def test_shape_examples(self):
         namespaces = default_namespaces()
@@ -68,7 +68,7 @@ class TestAnnotations(unittest.TestCase):
             namespaces_dict=namespaces,
             all_classes_mode=True,
             examples_mode=SHAPE_EXAMPLES,
-            input_format=TURTLE,
+            input_format=TURTLE_ITER,
             # instances_report_mode=MIXED_INSTANCES,
             disable_comments=False,
             generate_annotations=True
@@ -77,10 +77,11 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "one_class_shape_examples.shex",
-                                                      str_target=str_result))
-        self.assertIn(f"}} // {self._example_prop()}", str_result)
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_shape_examples.ttl",
+                                                     str_target=str_result))
+
 
     def test_constraint_examples(self):
         namespaces = default_namespaces()
@@ -99,9 +100,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_constraint_examples.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_constraint_examples.ttl",
+                                                     str_target=str_result))
 
     def test_all_examples(self):
         namespaces = default_namespaces()
@@ -120,9 +122,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_examples.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_examples.ttl",
+                                                     str_target=str_result))
 
     def test_ratios(self):
         namespaces = default_namespaces()
@@ -141,9 +144,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_ratios.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_ratios.ttl",
+                                                     str_target=str_result))
 
     def test_absolutes(self):
         namespaces = default_namespaces()
@@ -162,9 +166,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_absolutes.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_absolutes.ttl",
+                                                     str_target=str_result))
 
     def test_mixed_report(self):
         namespaces = default_namespaces()
@@ -183,9 +188,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_mixed_report.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_mixed_report.ttl",
+                                                     str_target=str_result))
 
     def test_all_examples_and_stats(self):
         namespaces = default_namespaces()
@@ -204,9 +210,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_examples_stats.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_examples_stats.ttl",
+                                                     str_target=str_result))
 
     def test_set_extra(self):
         namespaces = default_namespaces()
@@ -225,9 +232,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT",
             extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_set_extra.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_set_extra.ttl",
+                                                     str_target=str_result))
 
     def test_set_ratios(self):
         namespaces = default_namespaces()
@@ -246,9 +254,10 @@ class TestAnnotations(unittest.TestCase):
             frequency_property="http://weso.esss/RAT"
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_set_ratios.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_set_ratios.ttl",
+                                                     str_target=str_result))
 
     def test_set_examples(self):
         namespaces = default_namespaces()
@@ -267,9 +276,10 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT"
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_set_examples.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_set_examples.ttl",
+                                                     str_target=str_result))
 
     def test_set_absolutes(self):
         namespaces = default_namespaces()
@@ -288,6 +298,7 @@ class TestAnnotations(unittest.TestCase):
             # frequency_property="http://weso.esss/RAT"
             # extra_info_property="http://weso.esss/EXTRA"
         )
-        str_result = shaper.shex_graph(string_output=True)
-        self.assertTrue(file_vs_str_strip_comparison(file_path=_BASE_DIR + "one_class_all_set_absolutes.shex",
-                                                     target_str=str_result))
+        str_result = shaper.shex_graph(string_output=True,
+                                       output_format=SHACL_TURTLE)
+        self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_set_absolutes.ttl",
+                                                     str_target=str_result))

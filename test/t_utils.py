@@ -220,6 +220,18 @@ def file_vs_str_exact_comparison(file_path, target_str):
     with open(file_path, "r") as in_stream:
         return in_stream.read().strip() == target_str.strip()
 
+def file_vs_str_strip_comparison(file_path, target_str):
+    with open(file_path, "r") as in_stream:
+        content = in_stream.read().strip().split("\n")
+        target_strip = target_str.strip().split("\n")
+        if len(content) != len(target_strip):
+            return False
+        for i in range(len(content)):
+            if content[i].strip() != target_strip[i].strip():
+                return False
+    return True
+
+
 
 def filter_prefixes_str_shex(target_str):
     result = []
@@ -272,10 +284,11 @@ def shape_contains_constraint(target_str, shape, constraint):
 
 
 def graph_comparison_rdflib(g1, g2):
-    iso1 = to_isomorphic(g1)
-    iso2 = to_isomorphic(g2)
-    both, in1, in2 = graph_diff(iso1, iso2)
-    return len(both) == len(g1) and len(in1) == 0 and len(in2) == 0
+    # iso1 = to_isomorphic(g1)
+    # iso2 = to_isomorphic(g2)
+    # both, in1, in2 = graph_diff(iso1, iso2)
+    # return len(both) == len(g1) and len(in1) == 0 and len(in2) == 0
+    return to_isomorphic(g1) == to_isomorphic(g2)
 
 
 def _tune_elem_for_rdflib_comparison(original_elem):

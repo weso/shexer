@@ -1,14 +1,18 @@
 from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS, \
-    COMMENT_INI, TARGET_LINE_LENGHT, SPACES_GAP_FOR_FREQUENCY, KLEENE_CLOSURE, POSITIVE_CLOSURE, OPT_CARDINALITY, SHAPE_LINK_CHAR
+    COMMENT_INI, TARGET_LINE_LENGHT, SPACES_GAP_FOR_FREQUENCY, KLEENE_CLOSURE, POSITIVE_CLOSURE, OPT_CARDINALITY, \
+    SHAPE_LINK_CHAR, ANNOTATION_BEGIN
 from shexer.model.const_elem_types import IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 from shexer.utils.shapes import prefixize_shape_name_if_possible
-from shexer.utils.uri import prefixize_uri_if_possible
-from shexer.consts import FREQ_PROP
+from shexer.utils.uri import prefixize_uri_if_possible, serialize_as_triple_obj, add_corners_if_it_is_an_uri
+from shexer.utils.dict import reverse_keys_and_values
+from shexer.consts import FREQ_PROP, EXTRA_INFO_PROP, ABSOLUTE_COUNT_PROP
+
+
 
 _INVERSE_SENSE_SHEXC = "^"
-_ANNOTATION_BEGIN = "//"
-_FREQUENCY_PATTERN = "{:.3f}"
+
+_EXTRA_ANNOT_TEMPLATE = '"{}"'
 
 
 class BaseStatementSerializer(object):
@@ -16,14 +20,20 @@ class BaseStatementSerializer(object):
     def __init__(self, instantiation_property_str, frequency_serializer, disable_comments=False, is_inverse=False,
                  frequency_property=FREQ_PROP,
                  namespaces_dict=None,
-                 comments_to_annotations=False):
+                 comments_to_annotations=False,
+                 extra_info_prop=EXTRA_INFO_PROP,
+                 absolute_count_prop=ABSOLUTE_COUNT_PROP):
         self._instantiation_property_str = instantiation_property_str
         self._disable_comments = disable_comments
         self._is_inverse = is_inverse
         self._frequency_serializer = frequency_serializer
         self._frequency_property = frequency_property
-        self._namespaces_dict=namespaces_dict
+        self._namespaces_dict = namespaces_dict
         self._comments_to_annotations = comments_to_annotations
+        self._extra_infor_prop = extra_info_prop
+        self._absolute_count_prop = absolute_count_prop
+
+        self._reverse_namespaces_dict = reverse_keys_and_values(namespaces_dict)
 
     def serialize_statement_with_indent_level(self, a_statement, is_last_statement_of_shape):
         tuples_line_indent = []
@@ -43,26 +53,46 @@ class BaseStatementSerializer(object):
             result = self._sense_flag() + st_property + SPACES_GAP_BETWEEN_TOKENS + st_target_element + SPACES_GAP_BETWEEN_TOKENS + \
                      cardinality + \
                      BaseStatementSerializer.closure_of_statement(is_last_statement_of_shape)
-        if a_statement.cardinality not in [KLEENE_CLOSURE, OPT_CARDINALITY] and not self._disable_comments:
+        if a_statement.cardinality not in [KLEENE_CLOSURE, OPT_CARDINALITY] and not self._disable_comments and not self._comments_to_annotations:
             result += BaseStatementSerializer.adequate_amount_of_final_spaces(result)
             result += a_statement.probability_representation()
         tuples_line_indent.append((result, 1))
 
-        for a_comment in a_statement.comments:
-            tuples_line_indent.append((a_comment, 4))
+        if not self._comments_to_annotations:
+            for a_comment in a_statement.comments:
+                tuples_line_indent.append((a_comment, 4))
 
         return tuples_line_indent
 
     def _build_constraint_annotations(self, a_statement):
-        return SPACES_GAP_BETWEEN_TOKENS.join((_ANNOTATION_BEGIN,
-                                              prefixize_uri_if_possible(target_uri=self._frequency_property,
-                                                                        namespaces_prefix_dict=self._namespaces_dict,
-                                                                        corners=False),
-                                              self._format_frequency(a_statement.probability)
-                                              ))
+        # Frequency
+        freq_annotations = self._frequency_serializer.annotations_for_frequency(a_statement)
 
-    def _format_frequency(self, frequency_raw_number):
-        return _FREQUENCY_PATTERN.format(frequency_raw_number)
+        # Current annotations
+        extra = []
+        for an_annotation in a_statement.annotations:
+            annot_obj = serialize_as_triple_obj(sequence=an_annotation.obj,
+                                                namespaces_dict=self._reverse_namespaces_dict,
+                                                reverse_namespaces_dict=self._reverse_namespaces_dict)
+            extra.append(SPACES_GAP_BETWEEN_TOKENS.join((
+                ANNOTATION_BEGIN,
+                add_corners_if_it_is_an_uri(prefixize_uri_if_possible(target_uri=an_annotation.predicate,
+                                          namespaces_prefix_dict=self._namespaces_dict,
+                                          corners=False)),
+                annot_obj
+            )))
+
+        # COMMENTS TO ANNOTATIONS
+        for a_comment in a_statement.comments:
+            extra.append(SPACES_GAP_BETWEEN_TOKENS.join((ANNOTATION_BEGIN,
+                                                         add_corners_if_it_is_an_uri(prefixize_uri_if_possible(target_uri=self._extra_infor_prop,
+                                                                                   namespaces_prefix_dict=self._namespaces_dict,
+                                                                                   corners=False)),
+                                                         _EXTRA_ANNOT_TEMPLATE.format(a_comment[1:])
+                                                         )))
+        return "\n    ".join(freq_annotations + extra)
+
+
     def str_of_target_element(self, target_element, st_property):
         """
         Special treatment for instantiation_property. We build a value set with an specific URI
@@ -80,8 +110,8 @@ class BaseStatementSerializer(object):
         if a_token.startswith(STARTING_CHAR_FOR_SHAPE_NAME):  # Shape
             # return STARTING_CHAR_FOR_SHAPE_NAME +":" + a_token.replace(STARTING_CHAR_FOR_SHAPE_NAME, "")
             return SHAPE_LINK_CHAR \
-                   + prefixize_shape_name_if_possible(a_shape_name=a_token,
-                                                      namespaces_prefix_dict=namespaces_dict)
+                + prefixize_shape_name_if_possible(a_shape_name=a_token,
+                                                   namespaces_prefix_dict=namespaces_dict)
         if a_token in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE]:  # iri, bnode, nonliteral
             return a_token
         if ":" not in a_token:
@@ -115,7 +145,6 @@ class BaseStatementSerializer(object):
 
         return None if best_match is None else uri.replace(best_match, namespaces_dict[best_match] + ":")
 
-
     def probability_representation(self, statement):
         return COMMENT_INI + self._frequency_serializer.serialize_frequency(statement)
 
@@ -147,9 +176,9 @@ class BaseStatementSerializer(object):
     @staticmethod
     def turn_statement_into_comment(statement, namespaces_dict):
         return statement.probability_representation() + \
-               " obj: " + BaseStatementSerializer.tune_token(statement.st_type,
-                                                             namespaces_dict) + \
-               ". Cardinality: " + statement.cardinality_representation()
+            " obj: " + BaseStatementSerializer.tune_token(statement.st_type,
+                                                          namespaces_dict) + \
+            ". Cardinality: " + statement.cardinality_representation()
 
     def _sense_flag(self):
         return "" if not self._is_inverse else _INVERSE_SENSE_SHEXC + SPACES_GAP_BETWEEN_TOKENS

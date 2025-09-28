@@ -1,4 +1,6 @@
 
+_STR_BOOLS = ["true", "false"]
+_STR_TEMPLATE = '"{}"'
 
 def _add_prefix(unprefixed_elem, prefix):
     return prefix + ":" + unprefixed_elem
@@ -101,4 +103,26 @@ def get_prefix_of_namespace_if_it_exists(target_uri, namespaces_prefix_dict, cor
                     "#" not in candidate_uri[len(a_namespace):]:
                 return namespaces_prefix_dict[a_namespace]
 
+
+def serialize_as_triple_obj(sequence, namespaces_dict, reverse_namespaces_dict):
+    if sequence.startswith("http"):
+        return add_corners_if_needed(
+            prefixize_uri_if_possible(target_uri=sequence,
+                                      namespaces_prefix_dict=namespaces_dict,
+                                      corners=False))
+
+    elif sequence.startswith("<http"):
+        return prefixize_uri_if_possible(target_uri=sequence,
+                                         namespaces_prefix_dict=namespaces_dict,
+                                         corners=True)
+    # Case 1 --> a literal number
+    # Case 2 --> bool keyword
+    # Case 3 --> prefixed uri
+    # In either case it goes as it is when serialized in a triple obj
+    elif sequence.isnumeric() or \
+            sequence in _STR_BOOLS or \
+            is_a_correct_uri(target_uri=sequence, prefix_namespace_dict=reverse_namespaces_dict):
+        return sequence
+    else:  # Must be a string
+        return _STR_TEMPLATE.format(sequence)
 

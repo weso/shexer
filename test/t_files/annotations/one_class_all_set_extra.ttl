@@ -1,0 +1,52 @@
+@prefix : <http://weso.es/shapes/> .
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ns1: <http://weso.esss/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix shexer: <http://weso.es/shexer/ontology/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Person a sh:NodeShape ;
+    shexer:conformant_example ex:Jimmy ;
+    shexer:total_conforming_instances 5 ;
+    sh:property [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 1.0 ;
+            shexer:total_conforming_instances 5 ;
+            sh:in ( foaf:Person ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path rdf:type ],
+        [ a sh:PropertyShape ;
+            shexer:conformant_example ex:Bella ;
+            shexer:ratio_property_usage 0.2 ;
+            shexer:total_conforming_instances 1 ;
+            ns1:EXTRA "# 20.0 % (1 instance). obj: @:Person. Cardinality: {1}" ;
+            sh:maxCount 1 ;
+            sh:node :Person ;
+            sh:path foaf:knows ],
+        [ a sh:PropertyShape ;
+            shexer:conformant_example "22"^^xsd:string ;
+            shexer:ratio_property_usage 0.8 ;
+            shexer:total_conforming_instances 4 ;
+            ns1:EXTRA "# 80.0 % (4 instances). obj: xsd:integer. Cardinality: {1}" ;
+            sh:dataType xsd:integer ;
+            sh:maxCount 1 ;
+            sh:path foaf:age ],
+        [ a sh:PropertyShape ;
+            shexer:conformant_example "Jimmy"^^xsd:string ;
+            shexer:ratio_property_usage 0.6 ;
+            shexer:total_conforming_instances 3 ;
+            ns1:EXTRA "# 60.0 % (3 instances). obj: xsd:string. Cardinality: {1}" ;
+            sh:dataType xsd:string ;
+            sh:maxCount 1 ;
+            sh:path foaf:name ],
+        [ a sh:PropertyShape ;
+            shexer:conformant_example "Jones"^^xsd:string ;
+            shexer:ratio_property_usage 0.4 ;
+            shexer:total_conforming_instances 2 ;
+            ns1:EXTRA "# 40.0 % (2 instances). obj: xsd:string. Cardinality: {1}" ;
+            sh:dataType xsd:string ;
+            sh:maxCount 1 ;
+            sh:path foaf:familyName ] ;
+    sh:targetClass foaf:Person .

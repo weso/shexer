@@ -9,4 +9,4 @@ PREFIX : <http://weso.es/shapes/>
 :Person
 {
    rdf:type  [foaf:Person]                                     # 100.0 %
-} // rdfs:comment ex:Jimmy
+} // <http://weso.es/shexer/ontology/conformant_example> ex:Jimmy
