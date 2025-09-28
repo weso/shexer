@@ -11,15 +11,15 @@ PREFIX : <http://weso.es/shapes/>
 {
    rdf:type  [foaf:Person]    //  shexer:ratio_property_usage  1.000  ;
    foaf:age  xsd:integer  ?  //  shexer:ratio_property_usage  0.800
-    //  shexer:example_node_constraint  22
+    //  shexer:conformant_example  22
     //  rdfs:comment  " 80.0 % obj: xsd:integer. Cardinality: {1}"  ;
    foaf:name  xsd:string  ?  //  shexer:ratio_property_usage  0.600
-    //  shexer:example_node_constraint  "Jimmy"
+    //  shexer:conformant_example  "Jimmy"
     //  rdfs:comment  " 60.0 % obj: xsd:string. Cardinality: {1}"  ;
    foaf:familyName  xsd:string  ?  //  shexer:ratio_property_usage  0.400
-    //  shexer:example_node_constraint  "Jones"
+    //  shexer:conformant_example  "Jones"
     //  rdfs:comment  " 40.0 % obj: xsd:string. Cardinality: {1}"  ;
    foaf:knows  @:Person  ?  //  shexer:ratio_property_usage  0.200
-    //  shexer:example_node_constraint  ex:Bella
+    //  shexer:conformant_example  ex:Bella
     //  rdfs:comment  " 20.0 % obj: @:Person. Cardinality: {1}"
 }

@@ -18,4 +18,4 @@ PREFIX : <http://weso.es/shapes/>
     //  rdfs:comment  " 40.0 % obj: xsd:string. Cardinality: {1}"  ;
    foaf:knows  @:Person  ?  //  shexer:ratio_property_usage  0.200
     //  rdfs:comment  " 20.0 % obj: @:Person. Cardinality: {1}"
-} // shexer:example_node_constraint ex:Linda
+} // shexer:conformant_example ex:Linda

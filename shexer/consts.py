@@ -50,8 +50,8 @@ DEFAULT_NAMESPACES = {"http://example.org/": "ex",
             "http://xmlns.com/foaf/0.1/": "foaf"
             }
 
-# WESO-SHAPES-ONTO
+# WESO-SHAPES-ONTO  # todo !
 FREQ_PROP = "http://weso.es/shexer/ontology/ratio_property_usage"
 EXTRA_INFO_PROP = "http://www.w3.org/2000/01/rdf-schema#comment"
-EXAMPLE_CONFORMANCE_PROP = "http://weso.es/shexer/ontology/example_node_constraint"
+EXAMPLE_CONFORMANCE_PROP = "http://weso.es/shexer/ontology/conformant_example"
 ABSOLUTE_COUNT_PROP = "http://weso.es/shexer/ontology/total_conforming_instances"

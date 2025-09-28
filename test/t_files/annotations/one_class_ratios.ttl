@@ -1,0 +1,40 @@
+@prefix : <http://weso.es/shapes/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix shexer: <http://weso.es/shexer/ontology/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+:Person a sh:NodeShape ;
+    sh:property [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 0.4 ;
+            rdfs:comment "# 40.0 % obj: xsd:string. Cardinality: {1}" ;
+            sh:dataType xsd:string ;
+            sh:maxCount 1 ;
+            sh:path foaf:familyName ],
+        [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 0.6 ;
+            rdfs:comment "# 60.0 % obj: xsd:string. Cardinality: {1}" ;
+            sh:dataType xsd:string ;
+            sh:maxCount 1 ;
+            sh:path foaf:name ],
+        [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 1.0 ;
+            sh:in ( foaf:Person ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path rdf:type ],
+        [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 0.2 ;
+            rdfs:comment "# 20.0 % obj: @:Person. Cardinality: {1}" ;
+            sh:maxCount 1 ;
+            sh:node :Person ;
+            sh:path foaf:knows ],
+        [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 0.8 ;
+            rdfs:comment "# 80.0 % obj: xsd:integer. Cardinality: {1}" ;
+            sh:dataType xsd:integer ;
+            sh:maxCount 1 ;
+            sh:path foaf:age ] ;
+    sh:targetClass foaf:Person .

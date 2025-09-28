@@ -399,7 +399,9 @@ class Shaper(object):
                                     verbose=verbose,
                                     example_constraint_prop=self._example_conformance_prop,
                                     absolute_counts_prop=self._absolute_counts_prop,
-                                    comments_to_annotations=self._comments_to_annotations)
+                                    comments_to_annotations=self._comments_to_annotations,
+                                    extra_info_prop=self._extra_info_property,
+                                    frequency_prop=self._frequency_property)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,

@@ -59,8 +59,8 @@ class ShaclSerializer(object):
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, wikidata_annotation=False,
                  detect_minimal_iri=False, shape_example_features=None, shape_map=None, verbose=False,
-                 instances_report_mode=MIXED_INSTANCES, examples_mode=ALL_EXAMPLES, inverse_paths=False,
-                 example_constraint_prop=EXAMPLE_CONFORMANCE_PROP, comments_to_annotations=True,
+                 instances_report_mode=RATIO_INSTANCES, examples_mode=None, inverse_paths=False,
+                 example_constraint_prop=EXAMPLE_CONFORMANCE_PROP, comments_to_annotations=False,
                  absolute_counts_prop=ABSOLUTE_COUNT_PROP, extra_info_prop=EXTRA_INFO_PROP,
                  frequency_prop=FREQ_PROP):
         self._target_file = target_file
@@ -207,7 +207,7 @@ class ShaclSerializer(object):
             return
         if self._instances_report_mode in [MIXED_INSTANCES, RATIO_INSTANCES]:
             self._add_constraint_ratio_annotation(statement, r_constraint_node)
-        if self._instances_report_mode in [MIXED_INSTANCES, RATIO_INSTANCES]:
+        if self._instances_report_mode in [MIXED_INSTANCES, ABSOLUTE_INSTANCES]:
             self._add_constraint_absolutes_annotation(statement, r_constraint_node)
 
     def _add_constraint_ratio_annotation(self, statement, r_constraint_node):
