@@ -25,7 +25,12 @@ class TestAnnotations(unittest.TestCase):
             instances_report_mode=MIXED_INSTANCES,
             disable_comments=False,
             detect_minimal_iri=True,
-            comments_to_annotations=True)
+            comments_to_annotations=True,
+            absolute_counts_property="http://weso.esss/ABS",
+            example_conformance_property="http://weso.esss/CONF",
+            frequency_property="http://weso.esss/RAT",
+            extra_info_property="http://weso.esss/EXTRA"
+        )
         str_result = shaper.shex_graph(string_output=True)
         print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "g1_freq_annotations.shex",

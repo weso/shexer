@@ -9,7 +9,7 @@ from shexer.io.shex.formater.consts import SPACES_LEVEL_INDENTATION
 from shexer.io.wikidata import wikidata_annotation
 from shexer.io.file import read_file
 from shexer.consts import RATIO_INSTANCES, ABSOLUTE_INSTANCES, MIXED_INSTANCES, ALL_EXAMPLES, \
-    SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, EXAMPLE_CONSTRAINT_PROP, ABSOLUTE_COUNT_PROP
+    SHAPE_EXAMPLES, CONSTRAINT_EXAMPLES, EXAMPLE_CONFORMANCE_PROP, ABSOLUTE_COUNT_PROP
 from shexer.io.shex.formater.consts import SPACES_GAP_BETWEEN_TOKENS
 
 from wlighter import SHEXC_FORMAT
@@ -26,7 +26,7 @@ class ShexSerializer(object):
     def __init__(self, target_file, shapes_list, namespaces_dict=None, string_return=False,
                  instantiation_property_str=RDF_TYPE_STR, disable_comments=False, wikidata_annotation=False,
                  instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_example_features=None,
-                 examples_mode=None, inverse_paths=False, example_constraint_prop=EXAMPLE_CONSTRAINT_PROP,
+                 examples_mode=None, inverse_paths=False, example_constraint_prop=EXAMPLE_CONFORMANCE_PROP,
                  comments_to_annotations=False, absolute_counts_prop=ABSOLUTE_COUNT_PROP):
         self._target_file = target_file
         self._shapes_list = shapes_list

@@ -1,4 +1,4 @@
-from shexer.consts import SHEXC, SHACL_TURTLE
+from shexer.consts import SHEXC, SHACL_TURTLE, ABSOLUTE_COUNT_PROP, EXAMPLE_CONFORMANCE_PROP
 from shexer.io.shex.formater.shex_serializer import ShexSerializer
 from shexer.io.shacl.formater.shacl_serializer import ShaclSerializer
 from shexer.io.uml.uml_serializer import UMLSerializer
@@ -10,7 +10,11 @@ def get_shape_serializer(output_format, shapes_list, instance_tracker, target_fi
                          instantiation_property=None, disable_comments=False, wikidata_annotation=False,
                          instances_report_mode=RATIO_INSTANCES, detect_minimal_iri=False, shape_features_examples=None,
                          examples_mode=None, inverse_paths=False, rdfconfig_directory=None, endpoint_url=None,
-                         shape_map_raw=None, shape_map_file=None, verbose=False):
+                         shape_map_raw=None, shape_map_file=None, verbose=False,
+                         example_constraint_prop=EXAMPLE_CONFORMANCE_PROP, comments_to_annotations=False,
+                         absolute_counts_prop=ABSOLUTE_COUNT_PROP):
+
+
     if rdfconfig_directory is not None:
         return RdfConfigSerializer(target_directory=rdfconfig_directory,
                                    shapes_list=shapes_list,
@@ -31,7 +35,10 @@ def get_shape_serializer(output_format, shapes_list, instance_tracker, target_fi
                               detect_minimal_iri=detect_minimal_iri,
                               shape_example_features=shape_features_examples,
                               examples_mode=examples_mode,
-                              inverse_paths=inverse_paths)
+                              inverse_paths=inverse_paths,
+                              example_constraint_prop=example_constraint_prop,
+                              comments_to_annotations=comments_to_annotations,
+                              absolute_counts_prop=absolute_counts_prop)
     elif output_format == SHACL_TURTLE:
         return ShaclSerializer(target_file=target_file,
                                shapes_list=shapes_list,

@@ -2,7 +2,8 @@ from shexer.utils.obj_references import check_just_one_not_none
 
 from shexer.consts import SHEXC, SHACL_TURTLE, NT, TSV_SPO, N3, TURTLE, TURTLE_ITER, \
     RDF_XML, FIXED_SHAPE_MAP, JSON_LD, RDF_TYPE, SHAPES_DEFAULT_NAMESPACE, ZIP, GZ, XZ, \
-    ALL_EXAMPLES, CONSTRAINT_EXAMPLES, SHAPE_EXAMPLES, FREQ_PROP
+    ALL_EXAMPLES, CONSTRAINT_EXAMPLES, SHAPE_EXAMPLES, FREQ_PROP, ABSOLUTE_COUNT_PROP, \
+    EXAMPLE_CONFORMANCE_PROP, EXTRA_INFO_PROP
 from shexer.utils.factories.class_profiler_factory import get_class_profiler
 from shexer.utils.factories.instance_tracker_factory import get_instance_tracker
 from shexer.utils.factories.class_shexer_factory import get_class_shexer
@@ -66,7 +67,10 @@ class Shaper(object):
                  examples_mode=None,
                  federated_sources=None,  # could be a list
                  comments_to_annotations=False,
-                 frequency_property=FREQ_PROP
+                 frequency_property=FREQ_PROP,
+                 absolute_counts_property=ABSOLUTE_COUNT_PROP,
+                 example_conformance_property=EXAMPLE_CONFORMANCE_PROP,
+                 extra_info_property=EXTRA_INFO_PROP
                  ):
         """
 
@@ -199,8 +203,11 @@ class Shaper(object):
         self._namespaces_for_qualifier_props = namespaces_for_qualifier_props
         self._shapes_namespace = shapes_namespace
 
-        self._comments_to_annotations=comments_to_annotations
-        self._frequency_property=frequency_property
+        self._comments_to_annotations = comments_to_annotations
+        self._frequency_property = frequency_property
+        self._example_conformance_prop = example_conformance_property
+        self._absolute_counts_prop = absolute_counts_property
+        self._extra_info_property = extra_info_property
 
         #The following two atts are used for optimizations
         self._built_remote_graph = get_remote_graph_if_needed(endpoint_url=url_endpoint,
@@ -363,7 +370,9 @@ class Shaper(object):
                                 federated_sources=self._federated_sources,
                                 shape_names=self._shape_names,
                                 frequency_property=self._frequency_property,
-                                comments_to_annotations=self._comments_to_annotations)
+                                comments_to_annotations=self._comments_to_annotations,
+                                absolute_counts_prop=ABSOLUTE_COUNT_PROP,
+                                extra_info_property=self._extra_info_property)
 
     def _build_shapes_serializer(self, target_file, string_return, output_format, rdfconfig_directory, verbose):
         return get_shape_serializer(shapes_list=self._shape_list,
@@ -384,7 +393,10 @@ class Shaper(object):
                                     shape_map_file=self._shape_map_file,
                                     shape_map_raw=self._shape_map_raw,
                                     instance_tracker=self._instance_tracker,
-                                    verbose=verbose)
+                                    verbose=verbose,
+                                    example_constraint_prop=self._example_conformance_prop,
+                                    absolute_counts_prop=self._absolute_counts_prop,
+                                    comments_to_annotations=self._comments_to_annotations)
 
     def _build_class_profiler(self):
         return get_class_profiler(target_classes_dict=self._target_classes_dict,
