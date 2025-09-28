@@ -176,14 +176,6 @@ class ShexSerializer(object):
                     )
 
                     a_statement.add_comment(comment, insert_first=True)
-                # comment = _EXAMPLE_CONSTRAINT_TEMPLATE.format(
-                #     self._turn_str_comment_into_proper_rdf(
-                #         self._get_node_constraint_example_no_inverse(a_shape, a_statement) if not self._inverse_paths
-                #         else self._get_node_constraint_example_inverse(a_shape, a_statement)
-                #     )
-                # )
-                #
-                # a_statement.add_comment(comment, insert_first=True)
 
     def _turn_str_comment_into_proper_rdf(self, str_object_to_transform):
         """
