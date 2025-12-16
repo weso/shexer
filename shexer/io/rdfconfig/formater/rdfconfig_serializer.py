@@ -147,6 +147,11 @@ class RdfConfigSerializer(object):
 
     def _serialize_constraint(self, shape, constraint):
         st_property = self._nice_uri(constraint.st_property)
+        cardinality = constraint.cardinality
+        if cardinality == 1:
+            cardinality = ""
+        elif isinstance(cardinality, int):
+            cardinality = "{" + str(cardinality) + "}"
         if constraint.st_property == self._instantiation_property_str:
             st_type = self._nice_uri(constraint.st_type)
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
@@ -174,7 +179,7 @@ class RdfConfigSerializer(object):
                 # example_cons =  example_cons[0] +  example_cons[1:-1].replace('"', '\\"') + example_cons[-1]
                 example_cons = example_cons[0] + example_cons[1:-1] + example_cons[-1]
             self._write_shape_line(indentation=_PROPERTY_INDENT_LEVEL,
-                                   content=f"{st_property}:")
+                                   content=f"{st_property}{cardinality}:")
             self._write_shape_line(indentation=_CONSTRAINT_INDENT_LEVEL,
                                    content="{}: {}".format(self._variable_property_name(
                                        st_property=constraint.st_property,
