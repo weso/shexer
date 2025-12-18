@@ -53,7 +53,7 @@ class TestGraphListOfFilesInput(unittest.TestCase):
     def test_several_turtle(self):
         shaper = Shaper(target_classes=["http://xmlns.com/foaf/0.1/Person",
                                         "http://xmlns.com/foaf/0.1/Document"],
-                        graph_list_of_files_input=[
+                        list_of_url_input=[
                             "https://raw.githubusercontent.com/DaniFdezAlvarez/shexerp3/develop/test/t_files/graph_list_of_files_input/g1_p1.ttl",
                             "https://raw.githubusercontent.com/DaniFdezAlvarez/shexerp3/develop/test/t_files/graph_list_of_files_input/g1_p2.ttl"],
                         namespaces_dict=default_namespaces(),

@@ -9,6 +9,7 @@ from shexer.io.graph.yielder.filter.filter_namespaces_triple_yielder import Filt
 from shexer.io.graph.yielder.big_ttl_triples_yielder import BigTtlTriplesYielder
 from shexer.io.graph.yielder.multi_big_ttl_files_triple_yielder import MultiBigTtlTriplesYielder
 from shexer.io.graph.yielder.multi_zip_triples_yielder import MultiZipTriplesYielder
+from shexer.io.graph.yielder.light_turtle_triples_yielder import LightTurtleTriplesYielder, MultiLightTurtleTriplesYielder
 from shexer.utils.factories.shape_map_parser_factory import get_shape_map_parser
 from shexer.model.graph.endpoint_sgraph import EndpointSGraph
 from shexer.utils.translators.list_of_classes_to_shape_map import ListOfClassesToShapeMap
@@ -110,6 +111,10 @@ def get_triple_yielder(source_file=None, list_of_source_files=None, input_format
                                       list_of_files=list_of_source_files,
                                       compression_mode=compression_mode,
                                       zip_base_archives=zip_base_archives)
+
+    elif input_format in [TURTLE_ITER, TURTLE] and compression_mode is None:
+        result = _yielder_for_turtle_light(source_file=source_file,
+                                           list_of_files=list_of_source_files)
     elif input_format == TURTLE_ITER:
         result = _yielder_for_turtle_iter(source_file=source_file,
                                           allow_untyped_numbers=allow_untyped_numbers,
@@ -193,6 +198,11 @@ def _yielder_for_turtle_iter(source_file, raw_graph, allow_untyped_numbers, list
         return MultiBigTtlTriplesYielder(list_of_files=list_of_files,
                                          allow_untyped_numbers=allow_untyped_numbers,
                                          compression_mode=compression_mode)
+
+def _yielder_for_turtle_light(source_file, list_of_files):
+    if list_of_files is None:
+        return LightTurtleTriplesYielder(source_file=source_file)
+    return MultiLightTurtleTriplesYielder(list_of_files=list_of_files)
 
 
 def _yielder_for_tsv_spo(source_file, raw_graph, allow_untyped_numbers, list_of_files,

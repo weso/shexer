@@ -25,11 +25,6 @@ ex:David a <http://something#Person4> ;  # Missing age and use knows
 	foaf:familyName "Doulofeau" ;
 	foaf:knows ex:Sarah .
 
-ex:HumanLike a <something#Person5> ;
-    foaf:name "Person" ;  # foaf properties, but not explicit type.
-	foaf:familyName "Maybe" ;
-	foaf:age 99 ;
-	foaf:knows ex:David .
 
 
 

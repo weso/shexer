@@ -80,6 +80,22 @@ def get_namespaces_and_shapes_from_str_with_or(str_target):
 def unordered_lists_match(list1, list2):
     return set(list1) == set(list2)
 
+def no_conflict_in_namespaces(names_list_1, names_list_2):
+    prefix_namespace_1 = set_of_prefix_namespaces(names_list_1)
+    prefix_namespace_2 = set_of_prefix_namespaces(names_list_2)
+    for a_prefix in prefix_namespace_1:
+        if a_prefix in prefix_namespace_2:
+            if prefix_namespace_1[a_prefix] != prefix_namespace_2[a_prefix]:
+                return False
+    return True
+
+def set_of_prefix_namespaces(namespaces_list):
+    result = {}
+    for a_namespace_line in namespaces_list:
+        sep_index = a_namespace_line.find(":")
+        result[a_namespace_line[:sep_index].strip()] =  a_namespace_line[sep_index+1:].strip()
+    return result
+
 
 def ordered_lists_match(list1, list2):
     return list1 == list2
@@ -151,8 +167,11 @@ def or_shapes_comparison(shapes1, shapes2, check_order):
     return True
 
 
-def namespaces_match(names1, names2):
-    return unordered_lists_match(names1, names2)
+def namespaces_match(names1, names2, strict=True):
+    if strict:
+        return unordered_lists_match(names1, names2)
+    else:
+        return no_conflict_in_namespaces(names1, names2)
 
 
 def unsorted_constraints_comparison(shapes1, shapes2):
@@ -188,11 +207,11 @@ def shapes_match(shapes1, shapes2, or_shapes=False, check_order=False):
     return simple_constraints_comparison(shapes1, shapes2, check_order)
 
 
-def complex_shape_comparison(str1, str2, or_shapes=False, check_order=False):
+def complex_shape_comparison(str1, str2, or_shapes=False, check_order=False, strict=True):
     namespaces1, shapes1 = get_namespaces_and_shapes_from_str(str1, or_shapes)
     namespaces2, shapes2 = get_namespaces_and_shapes_from_str(str2, or_shapes)
 
-    if not namespaces_match(namespaces1, namespaces2):
+    if not namespaces_match(namespaces1, namespaces2, strict):
         return False
     return shapes_match(shapes1, shapes2, or_shapes, check_order)
 
@@ -203,17 +222,17 @@ def normalize_str(str_target):
     return _LINE_JUMPS.sub(result, "\n")
 
 
-def tunned_str_comparison(str1, str2, or_shapes=False, check_order=False):
+def tunned_str_comparison(str1, str2, or_shapes=False, check_order=False, strict=True):
     if normalize_str(str1) == normalize_str(str2):
         return True
     else:
-        return complex_shape_comparison(str1, str2, or_shapes, check_order)
+        return complex_shape_comparison(str1, str2, or_shapes, check_order, strict)
 
 
-def file_vs_str_tunned_comparison(file_path, str_target, or_shapes=False, check_order=False):
+def file_vs_str_tunned_comparison(file_path, str_target, or_shapes=False, check_order=False, strict=True):
     with open(file_path, "r") as in_stream:
         content = in_stream.read()
-    return tunned_str_comparison(content, str_target, or_shapes, check_order)
+    return tunned_str_comparison(content, str_target, or_shapes, check_order, strict)
 
 
 def file_vs_str_exact_comparison(file_path, target_str):

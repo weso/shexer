@@ -204,7 +204,8 @@ class TestAnnotations(unittest.TestCase):
             input_format=TURTLE_ITER,
             instances_report_mode=MIXED_INSTANCES,
             disable_comments=False,
-            generate_annotations=True
+            generate_annotations=True,
+            detect_minimal_iri=True
             # absolute_counts_property="http://weso.esss/ABS",
             # example_conformance_property="http://weso.esss/CONF",
             # frequency_property="http://weso.esss/RAT",
@@ -212,6 +213,7 @@ class TestAnnotations(unittest.TestCase):
         )
         str_result = shaper.shex_graph(string_output=True,
                                        output_format=SHACL_TURTLE)
+        print(str_result)
         self.assertTrue(graph_comparison_file_vs_str(file_path=_BASE_DIR + "one_class_all_examples_stats.ttl",
                                                      str_target=str_result))
 

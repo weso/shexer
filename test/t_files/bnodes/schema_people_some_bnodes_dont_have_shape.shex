@@ -8,6 +8,7 @@ PREFIX : <http://weso.es/shapes/>
 
 :person
 {
+   rdf:type  [ex:person]  ;
    ex:knows  BNode  ;
-   rdf:type  [ex:person]
+   ex:name  xsd:string  ?
 }
