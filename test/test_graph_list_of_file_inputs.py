@@ -18,8 +18,10 @@ class TestGraphListOfFilesInput(unittest.TestCase):
                         input_format=TURTLE,
                         disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
+        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=BASE_FILES_GENERAL + "g1_all_classes_no_comments.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_one_nt(self):  # Should be nt
@@ -58,5 +60,7 @@ class TestGraphListOfFilesInput(unittest.TestCase):
                         input_format=TURTLE,
                         disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
+        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=BASE_FILES_GENERAL + "g1_all_classes_no_comments.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))

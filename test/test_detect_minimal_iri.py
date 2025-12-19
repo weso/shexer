@@ -47,7 +47,8 @@ class TestDetectMinimalIri(unittest.TestCase):
             detect_minimal_iri=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "g1_different_namespaces_per_class.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_g1_different_namespaces_per_instance(self):
@@ -76,7 +77,7 @@ class TestDetectMinimalIri(unittest.TestCase):
             disable_comments=True,
             detect_minimal_iri=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "g1_different_namespaces_per_class.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 

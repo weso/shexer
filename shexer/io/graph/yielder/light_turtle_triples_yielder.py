@@ -8,12 +8,15 @@ import lightrdf
 
 class LightTurtleTriplesYielder(BaseTriplesYielder):
 
-    def __init__(self, source_file):
+    def __init__(self, source_file, namespaces_dict):
         super().__init__()
         self._prefixes = {}
         self._source_file = source_file
+        self._namespaces_dict = namespaces_dict if namespaces_dict is not None else {}
+        self._yielded_triples = 0
 
     def yield_triples(self):
+        self._extract_prefixes()
         parser = lightrdf.Parser()
         for s, p, o in parser.parse(self._source_file, base_iri=None):
             yield (
@@ -21,10 +24,18 @@ class LightTurtleTriplesYielder(BaseTriplesYielder):
                 tune_prop(p),
                 tune_token(o)
             )
+            self._yielded_triples += 1
 
-    def extract_prefixes(self, ttl_path):
-        prefixes = {}
-        with open(ttl_path, "r", encoding="utf-8") as f:
+    @property
+    def yielded_triples(self):
+        return self._yielded_triples
+
+    @property
+    def error_triples(self):  # No error triples in this parser, it crashes when finding an error
+        return 0
+
+    def _extract_prefixes(self):
+        with open(self._source_file, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line.startswith("@prefix"):
@@ -34,16 +45,19 @@ class LightTurtleTriplesYielder(BaseTriplesYielder):
         pieces = line.split(" ")
         prefix = pieces[1] if not pieces[1].endswith(":") else pieces[1][: - 1]
         base_url = remove_corners(pieces[2])
-        self._prefixes[prefix] = base_url
+        self._namespaces_dict[base_url] = prefix
 
 class MultiLightTurtleTriplesYielder(MultifileBaseTripleYielder):
-    def __init__(self, list_of_files):
+    def __init__(self, list_of_files, namespaces_dict):
         super(MultiLightTurtleTriplesYielder, self).__init__(
             list_of_files=list_of_files,
             namespaces_to_ignore=None,
             allow_untyped_numbers=False,
             compression_mode=None,
             zip_base_archive=None)
+        self._namespaces_dict = namespaces_dict
 
     def _constructor_file_yielder(self, a_source_file, parse_namespaces=False):
-        return LightTurtleTriplesYielder(source_file=a_source_file)
+        return LightTurtleTriplesYielder(source_file=a_source_file,
+                                         namespaces_dict=self._namespaces_dict)
+

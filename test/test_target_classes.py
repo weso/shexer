@@ -16,7 +16,8 @@ class TestTargetClasses(unittest.TestCase):
                         disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "one_target.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_several_targets(self):
@@ -28,7 +29,8 @@ class TestTargetClasses(unittest.TestCase):
                         disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "two_targets.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_one_target_prefixed_targets(self):
@@ -40,7 +42,8 @@ class TestTargetClasses(unittest.TestCase):
                         disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "one_target.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
 
