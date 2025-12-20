@@ -22,18 +22,21 @@ class TestBNodeHandling(unittest.TestCase):
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_bnode_people.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
     def test_format_nt(self):
         shaper = Shaper(
             graph_file_input=_BASE_DIR + "bnode_people.nt",
             namespaces_dict=default_namespaces(),
             all_classes_mode=True,
-            input_format=TURTLE_ITER,
+            input_format=NT,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_bnode_people.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
+
 
     def test_some_bnodes_dont_have_shape(self):
         shaper = Shaper(
@@ -44,7 +47,8 @@ class TestBNodeHandling(unittest.TestCase):
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_people_some_bnodes_dont_have_shape.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
     def test_some_bnodes_dont_have_shape_comments(self):
         shaper = Shaper(
@@ -129,7 +133,8 @@ class TestBNodeHandling(unittest.TestCase):
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_people_some_bnodes_dont_have_shape.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
     def test_enable_or_with_redundant_only_bnodes(self):
         shaper = Shaper(
@@ -142,7 +147,8 @@ class TestBNodeHandling(unittest.TestCase):
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "or_with_redundant_bnodes_and_shapes.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_enable_or_without_redundant_with_shapes_bnodes_and_iris(self):

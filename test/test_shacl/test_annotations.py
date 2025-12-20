@@ -204,7 +204,8 @@ class TestAnnotations(unittest.TestCase):
             input_format=TURTLE_ITER,
             instances_report_mode=MIXED_INSTANCES,
             disable_comments=False,
-            generate_annotations=True
+            generate_annotations=True,
+            detect_minimal_iri=True
             # absolute_counts_property="http://weso.esss/ABS",
             # example_conformance_property="http://weso.esss/CONF",
             # frequency_property="http://weso.esss/RAT",

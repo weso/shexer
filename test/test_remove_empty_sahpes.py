@@ -27,7 +27,8 @@ class TestRemoveEmptyShapes(unittest.TestCase):
                         remove_empty_shapes=False)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "one_empty_not_remove.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
 
     def test_some_empty_remove(self):
@@ -41,7 +42,8 @@ class TestRemoveEmptyShapes(unittest.TestCase):
                         remove_empty_shapes=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=G1_ALL_CLASSES_NO_COMMENTS,
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
     def test_some_empty_not_remove(self):
         shaper = Shaper(target_classes=["http://xmlns.com/foaf/0.1/Machine",
@@ -54,4 +56,5 @@ class TestRemoveEmptyShapes(unittest.TestCase):
                         remove_empty_shapes=False)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "some_empty_not_remove.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))

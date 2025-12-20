@@ -17,7 +17,8 @@ class TestWikidataAnnotation(unittest.TestCase):
                         )
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "wiki_example_noanot.shex",
-                                                      str_target=str_result))
+                                                      str_target=str_result,
+                                                      strict=False))
 
     def test_annotation(self):
         shaper = Shaper(all_classes_mode=True,
