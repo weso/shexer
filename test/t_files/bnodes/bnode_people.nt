@@ -1,10 +1,9 @@
-
 _:Alice <http://example.org/knows> _:Bob .
-_:Alice a <http://example.org/person> .
+_:Alice <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/person> .
 
 _:Bob <http://example.org/knows> _:Eve .
-_:Bob a <http://example.org/person> .
+_:Bob <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/person> .
 _:Bob <http://example.org/name> "Bob" .
 
 _:Eve <http://example.org/name> "Eve" .
-_:Eve a <http://example.org/person> .
+_:Eve <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/person> .

@@ -10,7 +10,16 @@
 :Person a sh:NodeShape ;
     shexer:conformant_example ex:Jimmy ;
     shexer:total_conforming_instances 5 ;
+    sh:pattern "^http://example.org/" ;
     sh:property [ a sh:PropertyShape ;
+            shexer:conformant_example "22"^^xsd:string ;
+            shexer:ratio_property_usage 0.8 ;
+            shexer:total_conforming_instances 4 ;
+            rdfs:comment "# 80.0 % (4 instances). obj: xsd:integer. Cardinality: {1}" ;
+            sh:dataType xsd:integer ;
+            sh:maxCount 1 ;
+            sh:path foaf:age ],
+        [ a sh:PropertyShape ;
             shexer:conformant_example "Jimmy"^^xsd:string ;
             shexer:ratio_property_usage 0.6 ;
             shexer:total_conforming_instances 3 ;
@@ -18,6 +27,13 @@
             sh:dataType xsd:string ;
             sh:maxCount 1 ;
             sh:path foaf:name ],
+        [ a sh:PropertyShape ;
+            shexer:ratio_property_usage 1.0 ;
+            shexer:total_conforming_instances 5 ;
+            sh:in ( foaf:Person ) ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:path rdf:type ],
         [ a sh:PropertyShape ;
             shexer:conformant_example "Jones"^^xsd:string ;
             shexer:ratio_property_usage 0.4 ;
@@ -33,20 +49,5 @@
             rdfs:comment "# 20.0 % (1 instance). obj: @:Person. Cardinality: {1}" ;
             sh:maxCount 1 ;
             sh:node :Person ;
-            sh:path foaf:knows ],
-        [ a sh:PropertyShape ;
-            shexer:conformant_example "22"^^xsd:string ;
-            shexer:ratio_property_usage 0.8 ;
-            shexer:total_conforming_instances 4 ;
-            rdfs:comment "# 80.0 % (4 instances). obj: xsd:integer. Cardinality: {1}" ;
-            sh:dataType xsd:integer ;
-            sh:maxCount 1 ;
-            sh:path foaf:age ],
-        [ a sh:PropertyShape ;
-            shexer:ratio_property_usage 1.0 ;
-            shexer:total_conforming_instances 5 ;
-            sh:in ( foaf:Person ) ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:path rdf:type ] ;
+            sh:path foaf:knows ] ;
     sh:targetClass foaf:Person .
