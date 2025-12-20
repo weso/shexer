@@ -2,12 +2,14 @@ from shexer.utils.log import log_msg
 from shexer.utils.literal import there_is_arroba_after_last_quotes
 from shexer.utils.triple_yielders import tune_prop, tune_token  # , check_if_property_belongs_to_namespace_list
 from shexer.io.graph.yielder.base_triples_yielder import BaseTriplesYielder
+from shexer.utils.exception import ParseError
+
 
 
 class NtTriplesYielder(BaseTriplesYielder):
 
     def __init__(self, source_file=None, allow_untyped_numbers=False, raw_graph=None,
-                 compression_mode=None, zip_base_archive=None):
+                 compression_mode=None, zip_base_archive=None, silent_error=False):
 
         super(NtTriplesYielder, self).__init__()
         self._source_file = source_file
@@ -15,27 +17,36 @@ class NtTriplesYielder(BaseTriplesYielder):
         self._triples_count = 0
         self._error_triples = 0
         self._allow_untyped_numbers = allow_untyped_numbers
+        self._silent_error = silent_error
         self._line_reader = self._decide_line_reader(source_file=source_file,
                                                      raw_graph=raw_graph,
                                                      compression_mode=compression_mode,
                                                      zip_base_archive=zip_base_archive)
-        # The following ones are refs to functions. Im avoiding some comparison here.
+        # The following ones are refs to functions. I'm avoiding some comparison here.
         # self.yield_triples = self._yield_triples_not_excluding_namespaces if namespaces_to_ignore is None \
         #     else self._yield_triples_excluding_namespaces
 
     def yield_triples(self):
         self._reset_count()
-        for a_line in self._line_reader.read_lines():
-            tokens = self._look_for_tokens(a_line.strip())
-            if len(tokens) != 3:
-                self._error_triples += 1
-                log_msg(verbose=False, msg="This line was discarded: " + a_line)
-            else:
-                yield (tune_token(a_token=tokens[0]),
-                       tune_prop(a_token=tokens[1]),
-                       tune_token(a_token=tokens[2],
-                                  allow_untyped_numbers=self._allow_untyped_numbers))
-                self._triples_count += 1
+        try:
+            for a_line in self._line_reader.read_lines():
+                a_line = a_line.strip()
+                if a_line != "":
+                    tokens = self._look_for_tokens(a_line)
+                    if len(tokens) != 3:
+                        if self._silent_error:
+                            self._error_triples += 1
+                            log_msg(verbose=False, msg="This line was discarded: " + a_line)
+                        else:
+                            raise ParseError(f"Line: '{a_line}'")
+                    else:
+                        yield (tune_token(a_token=tokens[0]),
+                               tune_prop(a_token=tokens[1]),
+                               tune_token(a_token=tokens[2],
+                                          allow_untyped_numbers=self._allow_untyped_numbers))
+                        self._triples_count += 1
+        except BaseException as e:
+            raise ParseError(f"Error while parsing. {e}") from e
 
     def _look_for_tokens(self, str_line):
         result = []

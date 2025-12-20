@@ -21,7 +21,6 @@ class TestBNodeHandling(unittest.TestCase):
             input_format=TURTLE_ITER,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_bnode_people.shex",
                                                       str_target=str_result,
                                                       strict=False))
@@ -34,7 +33,6 @@ class TestBNodeHandling(unittest.TestCase):
             input_format=NT,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_bnode_people.shex",
                                                       str_target=str_result,
                                                       strict=False))
@@ -48,7 +46,6 @@ class TestBNodeHandling(unittest.TestCase):
             input_format=TURTLE_ITER,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_people_some_bnodes_dont_have_shape.shex",
                                                       str_target=str_result,
                                                       strict=False))
@@ -135,7 +132,6 @@ class TestBNodeHandling(unittest.TestCase):
             disable_or_statements=False,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "schema_people_some_bnodes_dont_have_shape.shex",
                                                       str_target=str_result,
                                                       strict=False))
@@ -150,7 +146,6 @@ class TestBNodeHandling(unittest.TestCase):
             allow_redundant_or=True,
             disable_comments=True)
         str_result = shaper.shex_graph(string_output=True)
-        print(str_result)
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "or_with_redundant_bnodes_and_shapes.shex",
                                                       str_target=str_result,
                                                       strict=False))

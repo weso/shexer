@@ -115,7 +115,8 @@ def get_triple_yielder(source_file=None, list_of_source_files=None, input_format
     elif input_format in [TURTLE_ITER, TURTLE] and compression_mode is None:
         result = _yielder_for_turtle_light(source_file=source_file,
                                            list_of_files=list_of_source_files,
-                                           namespaces_dict=namespaces_dict)
+                                           namespaces_dict=namespaces_dict,
+                                           raw_graph=raw_graph)
     elif input_format == TURTLE_ITER:
         result = _yielder_for_turtle_iter(source_file=source_file,
                                           allow_untyped_numbers=allow_untyped_numbers,
@@ -200,9 +201,10 @@ def _yielder_for_turtle_iter(source_file, raw_graph, allow_untyped_numbers, list
                                          allow_untyped_numbers=allow_untyped_numbers,
                                          compression_mode=compression_mode)
 
-def _yielder_for_turtle_light(source_file, list_of_files, namespaces_dict):
+def _yielder_for_turtle_light(source_file, list_of_files, namespaces_dict, raw_graph):
     if list_of_files is None:
         return LightTurtleTriplesYielder(source_file=source_file,
+                                         raw_graph=raw_graph,
                                          namespaces_dict=namespaces_dict)
     return MultiLightTurtleTriplesYielder(list_of_files=list_of_files,
                                           namespaces_dict=namespaces_dict)

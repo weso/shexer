@@ -303,8 +303,8 @@ def shape_contains_constraint(target_str, shape, constraint):
 
 
 def graph_comparison_rdflib(g1, g2):
-    # iso1 = to_isomorphic(g1)
-    # iso2 = to_isomorphic(g2)
+    iso1 = to_isomorphic(g1)
+    iso2 = to_isomorphic(g2)
     # both, in1, in2 = graph_diff(iso1, iso2)
     # return len(both) == len(g1) and len(in1) == 0 and len(in2) == 0
     return to_isomorphic(g1) == to_isomorphic(g2)
