@@ -6,3 +6,4 @@ wlighter==1.0.1
 plantuml==0.3.0
 python-xz==0.5.0
 six==1.16.0
+lightrdf==0.4.0
