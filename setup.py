@@ -8,12 +8,12 @@ def read(file_path):
 setup(
   name = 'shexer',
   packages = find_packages(exclude=["*.local_code.*"]), # this must be the same as the name above
-  version = '2.7.2',
+  version = '2.7.2.1',
   description = 'Automatic schema extraction for RDF graphs',
   author = 'Daniel Fernandez-Alvarez',
   author_email = 'danifdezalvarez@gmail.com',
   url = 'https://github.com/DaniFdezAlvarez/shexer',
-  download_url = 'https://github.com/DaniFdezAlvarez/shexer/archive/2.7.2.tar.gz',
+  download_url = 'https://github.com/DaniFdezAlvarez/shexer/archive/2.7.2.1.tar.gz',
   keywords = ['testing', 'shexer', 'shexerp3', "rdf", "shex", "shacl", "schema"],
   long_description = read('README.md'),
   long_description_content_type='text/markdown',
@@ -34,6 +34,7 @@ setup(
 		  'SPARQLWrapper',
           'wlighter',
           'plantuml',
-          'python-xz'
+          'python-xz',
+          'lightrdf'
       ],
 )
