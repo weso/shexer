@@ -9,12 +9,10 @@ Language:
 
 ## Citation
 
-The most recent sork to cite this software is the following: [sheXer: A robust and versatile library for automatic extraction of RDF shapes](https://www.sciencedirect.com/science/article/pii/S2352711026000865).
-
-If you want to read the paper but cannot access the full-content using the previous link, there is a [preprint available in Researchgate](https://www.researchgate.net/publication/357146819_Automatic_extraction_of_shapes_using_sheXer).
+The most recent work to cite this software is the following: [sheXer: A robust and versatile library for automatic extraction of RDF shapes](https://www.sciencedirect.com/science/article/pii/S2352711026000865).
 
 
-However, please, be aware that this software capabilities' have evolved and improved since the publication of the mentioned paper.
+However, please, be aware that this software capabilities' evolve and the latest publication may be outdated.
 
 ## Installation
 
