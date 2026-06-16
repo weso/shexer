@@ -7,4 +7,3 @@ plantuml==0.3.0
 python-xz==0.5.0
 six==1.16.0
 lightrdf==0.4.0
-importlib-metadata==6.8.0
