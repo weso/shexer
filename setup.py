@@ -36,6 +36,7 @@ setup(
           'plantuml',
           'python-xz',
           'lightrdf',
-          'six'
+          'six',
+          'importlib-metadata'
       ],
 )
