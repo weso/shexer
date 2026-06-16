@@ -152,24 +152,3 @@ def _query_endpoint_json_result(endpoint_url: str, str_query: str, max_retries= 
         f"Maximum number of retries exceeded ({max_retries}). "
         f"Last error: {last_error}"
     ) from last_error
-
-
-# def _query_endpoint_json_result(endpoint_url, str_query, max_retries=5, sleep_time=2, fake_user_agent=True):
-#     first_failure = True
-#     sparql = SPARQLWrapper(endpoint_url)
-#     if fake_user_agent:
-#         sparql.agent = _FAKE_USER_AGENT
-#     sparql.setQuery(str_query)
-#     sparql.setReturnFormat(JSON)
-#     last_error = None
-#     while max_retries > 0:
-#         try:
-#             return sparql.query().convert()
-#         except (HTTPError, EndPointInternalError) as e:
-#             max_retries -= 1
-#             sleep(sleep_time)
-#             last_error = e
-#             if first_failure and not fake_user_agent:
-#                 sparql.agent = _FAKE_USER_AGENT
-#                 first_failure = not first_failure
-#     last_error.msg = "Max number of attempt reached, it is not possible to perform the query. Msg:\n" + last_error.msg
