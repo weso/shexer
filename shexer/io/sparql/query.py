@@ -116,7 +116,7 @@ def _build_sparql_client(endpoint_url, query, user_agent):
 def _build_user_agent():
     return (
         f"sheXer/{version('shexer')} "
-        "(https://github.com/DaniFdezAlvarez/shexer)"
+        "(https://github.com/weso/shexer)"
     )
 
 def _query_endpoint_json_result(endpoint_url: str, str_query: str, max_retries= 5, base_delay: float = 1.0):
