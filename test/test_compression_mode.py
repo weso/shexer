@@ -317,7 +317,7 @@ class TestCompressionMode(unittest.TestCase):
                         "LIMIT 1'@<Flag>"
         try:
             shaper = Shaper(shape_map_raw=shape_map_raw,
-                            url_endpoint="https://query.wikidata.org/sparql",
+                            url_endpoint="https://qlever.dev/api/wikidata",
                             namespaces_dict=default_namespaces(),
                             instantiation_property="http://www.wikidata.org/prop/direct/P31",
                             disable_comments=True,
