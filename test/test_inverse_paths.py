@@ -31,7 +31,7 @@ class TestInversePaths(unittest.TestCase):
                         "{ ?p <http://www.wikidata.org/prop/direct/P31> <http://www.wikidata.org/entity/Q14660> } " \
                         "LIMIT 1'@<Flag>"
         shaper = Shaper(shape_map_raw=shape_map_raw,
-                        url_endpoint="https://query.wikidata.org/sparql",
+                        url_endpoint="https://qlever.dev/api/wikidata",
                         namespaces_dict=default_namespaces(),
                         instantiation_property="http://www.wikidata.org/prop/direct/P31",
                         disable_comments=True,
@@ -41,5 +41,5 @@ class TestInversePaths(unittest.TestCase):
                         inverse_paths=True)
         str_result = shaper.shex_graph(string_output=True)
         self.assertTrue(number_of_shapes(str_result) == 1)
-        self.assertTrue("^  <http://schema.org/about>  IRI" in str_result)
+        self.assertTrue("^  <http://www.wikidata.org/prop/direct/P163>  IRI" in str_result)
 
