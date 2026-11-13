@@ -2,6 +2,7 @@ from shexer.utils.shapes import build_shapes_name_for_class_uri
 from shexer.core.profiling.strategy.abstract_feature_direction_strategy import AbstractFeatureDirectionStrategy
 from shexer.core.profiling.consts import _S, _P, _O, POS_FEATURES_INVERSE, POS_CLASSES
 from shexer.model.IRI import IRI_ELEM_TYPE
+from shexer.model.bnode import BNODE_ELEM_TYPE
 
 _C_MAP_POS_DIRECT = 0
 _C_MAP_POS_INVERSE = 1
@@ -122,7 +123,7 @@ class IncludeReverseFeaturesStrategy(AbstractFeatureDirectionStrategy):
         str_prop = a_triple[_P].iri
         type_subj = self._decide_type_elem(a_triple[_S], str_prop)
 
-        subj_shapes = [] if type_subj != IRI_ELEM_TYPE else self._decide_shapes_elem(a_triple[_S].iri)
+        subj_shapes = [] if type_subj not in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE] else self._decide_node_kinds(a_triple[_S].iri)
 
         self._introduce_needed_elements_in_shape_instances_dict_for_obj(str_obj=str_obj,
                                                                         str_prop=str_prop,

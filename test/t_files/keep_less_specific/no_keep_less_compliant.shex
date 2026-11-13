@@ -9,7 +9,7 @@ PREFIX : <http://weso.es/shapes/>
 :Person
 {
    rdf:type  [foaf:Person]  ;
-   foaf:name  xsd:string  *;
+   foaf:name  xsd:string  +;
    foaf:familyName  xsd:string  ?;
    foaf:age  xsd:integer  ?;
    foaf:knows  @:Person  ?

@@ -3,6 +3,7 @@ from shexer.core.profiling.consts import POS_CLASSES, _S, _P, _O, POS_FEATURES_D
 from shexer.model.IRI import IRI_ELEM_TYPE, IRI
 from shexer.model.bnode import BNode, BNODE_ELEM_TYPE
 from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
+from shexer.model.const_elem_types import NONLITERAL_ELEM_TYPE, UNSHAPED_ELEM_TYPE
 
 class AbstractFeatureDirectionStrategy(object):
 
@@ -126,6 +127,10 @@ class AbstractFeatureDirectionStrategy(object):
         return [self._get_shape_name_for_a_class(a_class)
                 for a_class in self._i_dict[str_elem][POS_CLASSES]]
 
+    def _decide_node_kinds(self, str_elem):
+        shapes = self._decide_shapes_elem(str_elem)
+        return shapes + [NONLITERAL_ELEM_TYPE] + ([] if shapes else [UNSHAPED_ELEM_TYPE])
+
     def _get_shape_name_for_a_class(self, a_class):
         # self._assign_shape_name_if_needed(a_class)
         if a_class.startswith("<"):
@@ -146,7 +151,7 @@ class AbstractFeatureDirectionStrategy(object):
         str_prop = a_triple[_P].iri
         type_obj = self._decide_type_elem(a_triple[_O], str_prop)
 
-        obj_shapes = [] if type_obj not in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE] else self._decide_shapes_elem(a_triple[_O].iri)
+        obj_shapes = [] if type_obj not in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE] else self._decide_node_kinds(a_triple[_O].iri)
 
         self._introduce_needed_elements_in_shape_instances_dict_for_subj(str_subj=str_subj,
                                                                          str_prop=str_prop,
