@@ -3,7 +3,8 @@ from rdflib import Graph
 from shexer.io.sparql.query import build_term
 from shexer.model.bnode import BNode
 from shexer.model.graph.rdflib_sgraph import RdflibSgraph
-from shexer.utils.literal import decide_literal_type, XSD_NAMESPACE, LANG_STRING_TYPE, STRING_TYPE
+from shexer.utils.literal import decide_literal_type, build_literal_token, unescape_literal_content, \
+    XSD_NAMESPACE, LANG_STRING_TYPE, STRING_TYPE
 from shexer.utils.triple_yielders import tune_token
 
 _XSD_INT = XSD_NAMESPACE + "int"
@@ -14,8 +15,11 @@ _XSD_DOUBLE = XSD_NAMESPACE + "double"
 _SARAH = "<http://example.org/sarah>"
 _AGE = "<http://example.org/age>"
 _NAME = "<http://example.org/name>"
+_BIO = "<http://example.org/bio>"
 _KNOWS = "<http://example.org/knows>"
 _FRIEND = "<http://example.org/jim>"
+
+_MULTILINE_VALUE = 'say "hi" \\o/\nline2\r\tend'
 
 
 class TestBuildTerm(unittest.TestCase):
@@ -44,9 +48,58 @@ class TestBuildTerm(unittest.TestCase):
         self.assertEqual('"say \\"hi\\" \\\\o/"',
                          build_term({"type": "literal", "value": 'say "hi" \\o/'}))
 
+    def test_literal_with_line_breaks(self):
+        self.assertEqual('"line1\\nline2\\r"',
+                         build_term({"type": "literal", "value": "line1\nline2\r"}))
+
     def test_bnode(self):
         self.assertEqual("_:b0",
                          build_term({"type": "bnode", "value": "b0"}))
+
+
+class TestBuildLiteralToken(unittest.TestCase):
+
+    def test_plain(self):
+        self.assertEqual('"Sarah"', build_literal_token("Sarah"))
+
+    def test_lang(self):
+        self.assertEqual('"Sarah"@en', build_literal_token("Sarah", lang="en"))
+
+    def test_datatype(self):
+        self.assertEqual('"30"^^<http://www.w3.org/2001/XMLSchema#int>',
+                         build_literal_token("30", datatype=_XSD_INT))
+
+    def test_escaped_characters(self):
+        self.assertEqual('"say \\"hi\\" \\\\o/\\nline2\\r\tend"',
+                         build_literal_token(_MULTILINE_VALUE))
+
+
+class TestUnescapeLiteralContent(unittest.TestCase):
+
+    def test_quote(self):
+        self.assertEqual('say "hi"', unescape_literal_content('say \\"hi\\"'))
+
+    def test_backslash(self):
+        self.assertEqual("C:\\new", unescape_literal_content("C:\\\\new"))
+
+    def test_line_breaks_and_tab(self):
+        self.assertEqual("a\nb\rc\td", unescape_literal_content("a\\nb\\rc\\td"))
+
+    def test_short_unicode_escape(self):
+        self.assertEqual("caf\u00e9", unescape_literal_content("caf\\u00e9"))
+
+    def test_long_unicode_escape(self):
+        self.assertEqual("\U0001F600", unescape_literal_content("\\U0001F600"))
+
+    def test_unknown_escape_is_kept(self):
+        self.assertEqual("\\q", unescape_literal_content("\\q"))
+
+    def test_truncated_unicode_escape_is_kept(self):
+        self.assertEqual("\\u12", unescape_literal_content("\\u12"))
+
+    def test_inverse_of_build_literal_token(self):
+        self.assertEqual(_MULTILINE_VALUE,
+                         unescape_literal_content(build_literal_token(_MULTILINE_VALUE)[1:-1]))
 
 
 class TestDecideLiteralType(unittest.TestCase):
@@ -103,6 +156,11 @@ class TestEndpointTermRoundTrip(unittest.TestCase):
         self.assertEqual(STRING_TYPE, literal.elem_type)
         self.assertEqual('say "hi"', str(literal))
 
+    def test_literal_with_escaped_characters(self):
+        literal = tune_token(build_term({"type": "literal", "value": _MULTILINE_VALUE}))
+        self.assertEqual(STRING_TYPE, literal.elem_type)
+        self.assertEqual(_MULTILINE_VALUE, str(literal))
+
 
 class TestRdflibSgraphRoundTrip(unittest.TestCase):
 
@@ -110,6 +168,7 @@ class TestRdflibSgraphRoundTrip(unittest.TestCase):
         self.triples = [(_SARAH, _AGE, '"30"^^<http://www.w3.org/2001/XMLSchema#int>'),
                         (_SARAH, _NAME, '"Sarah"@en'),
                         (_SARAH, _NAME, '"Sarah"@fr'),
+                        (_SARAH, _BIO, build_literal_token(_MULTILINE_VALUE)),
                         (_SARAH, _KNOWS, _FRIEND),
                         (_SARAH, _KNOWS, "_:b0")]
         self.sgraph = RdflibSgraph(rdflib_graph=Graph())
@@ -127,3 +186,9 @@ class TestRdflibSgraphRoundTrip(unittest.TestCase):
         self.assertEqual(LANG_STRING_TYPE, objects['"Sarah"@fr'].elem_type)
         self.assertEqual("http://example.org/jim", objects[_FRIEND].iri)
         self.assertIsInstance(objects["_:b0"], BNode)
+
+    def test_escaped_characters_read_back(self):
+        objects = {o: tune_token(o) for _, _, o in self.sgraph.yield_p_o_triples_of_an_s("http://example.org/sarah")}
+        literal = objects[build_literal_token(_MULTILINE_VALUE)]
+        self.assertEqual(STRING_TYPE, literal.elem_type)
+        self.assertEqual(_MULTILINE_VALUE, str(literal))

@@ -1,6 +1,7 @@
-from rdflib import URIRef, Graph
+from rdflib import URIRef, Graph, Literal
 from rdflib.util import from_n3
 from shexer.model.graph.abstract_sgraph import SGraph
+from shexer.utils.literal import build_literal_token
 from shexer.utils.uri import add_corners_if_it_is_an_uri, remove_corners
 from shexer.core.instances.pconsts import _S, _P, _O
 from shexer.consts import RDF_TYPE
@@ -35,14 +36,14 @@ class RdflibSgraph(SGraph):
                                                                          raise_error_if_no_corners=False)),
                                                    None,
                                                    None)):
-            yield s.n3(), p.n3(), o.n3()
+            yield s.n3(), p.n3(), self._to_token(o)
 
     def yield_s_p_triples_of_an_o(self, target_node):
         for s, p, o in self._rdflib_graph.triples((None,
                                                    None,
                                                    URIRef(remove_corners(a_uri=target_node,
                                                                          raise_error_if_no_corners=False)))):
-            yield s.n3(), p.n3(), o.n3()
+            yield s.n3(), p.n3(), self._to_token(o)
 
 
     def yield_class_triples_of_an_s(self, target_node, instantiation_property):
@@ -51,7 +52,7 @@ class RdflibSgraph(SGraph):
                                                    URIRef(remove_corners(a_uri=instantiation_property,
                                                                          raise_error_if_no_corners=False)),
                                                    None)):
-            yield s.n3(), p.n3(), o.n3()
+            yield s.n3(), p.n3(), self._to_token(o)
 
     def add_triple(self, a_triple):
         """
@@ -81,3 +82,10 @@ class RdflibSgraph(SGraph):
         else:
             result.parse(data=raw_graph, format=format)
         return result
+
+    def _to_token(self, term):
+        if type(term) == Literal:
+            return build_literal_token(str(term),
+                                       lang=term.language,
+                                       datatype=str(term.datatype) if term.datatype is not None else None)
+        return term.n3()

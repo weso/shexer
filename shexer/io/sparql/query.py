@@ -8,6 +8,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from SPARQLWrapper.SPARQLExceptions import EndPointInternalError
+from shexer.utils.literal import build_literal_token
 
 _FAKE_USER_AGENT = "sheXer/5.0 (Platform; Security; OS-or-CPU; Localization; rv:1.4) Gecko/20030624 Netscape/7.1 (ax)"
 _RESULTS_KEY = "results"
@@ -27,12 +28,9 @@ def build_term(result_dict):
     if elem_type == _URI_TYPE:
         return value if value.startswith("<") else "<" + value + ">"
     if elem_type in _LITERAL_TYPES:
-        quoted = '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'
-        if _XML_LANG_FIELD in result_dict:
-            return quoted + "@" + result_dict[_XML_LANG_FIELD]
-        if _DATATYPE_FIELD in result_dict:
-            return quoted + "^^<" + result_dict[_DATATYPE_FIELD] + ">"
-        return quoted
+        return build_literal_token(value,
+                                   lang=result_dict.get(_XML_LANG_FIELD),
+                                   datatype=result_dict.get(_DATATYPE_FIELD))
     return "_:" + value
 
 

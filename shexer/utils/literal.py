@@ -75,9 +75,46 @@ def decide_literal_type(a_literal, base_namespace=None):
     else:
         raise RuntimeError("Unrecognized literal type:" + a_literal)
 
+_ECHARS = {"t": "\t", "b": "\b", "n": "\n", "r": "\r", "f": "\f", "\"": "\"", "'": "'", "\\": "\\"}
+_UCHAR_SIZES = {"u": 4, "U": 8}
+
+
+def unescape_literal_content(content):
+    result = []
+    i = 0
+    while i < len(content):
+        if content[i] == "\\" and i + 1 < len(content):
+            escaped = content[i + 1]
+            if escaped in _ECHARS:
+                result.append(_ECHARS[escaped])
+                i += 2
+                continue
+            if escaped in _UCHAR_SIZES:
+                hex_digits = content[i + 2:i + 2 + _UCHAR_SIZES[escaped]]
+                try:
+                    if len(hex_digits) == _UCHAR_SIZES[escaped]:
+                        result.append(chr(int(hex_digits, 16)))
+                        i += 2 + _UCHAR_SIZES[escaped]
+                        continue
+                except ValueError:
+                    pass
+        result.append(content[i])
+        i += 1
+    return "".join(result)
+
+
+def build_literal_token(value, lang=None, datatype=None):
+    quoted = '"' + value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r") + '"'
+    if lang is not None:
+        return quoted + "@" + lang
+    if datatype is not None:
+        return quoted + "^^<" + datatype + ">"
+    return quoted
+
+
 def parse_literal(an_elem, base_namespace=None):
     closing_quotes = find_next_unescaped_quotes(an_elem, 1)
-    content = an_elem[1:closing_quotes].replace("\\\"", "\"")
+    content = unescape_literal_content(an_elem[1:closing_quotes])
     elem_type = decide_literal_type(a_literal=an_elem,
                                     base_namespace=base_namespace)
     return content, elem_type
