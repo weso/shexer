@@ -166,7 +166,8 @@ class AbstractShexingStrategy(object):
                 return self._statement_for_a_group_with_a_useless_positive_closure(mergeable_constraints)
         mergeable_constraints.sort()
         result = None
-        if self._keep_less_specific:
+        if self._keep_less_specific \
+                or self._all_compliant_mode and self._has_several_exact_cardinalities(mergeable_constraints):
             for a_statement in mergeable_constraints.constraints():
                 if a_statement.cardinality == POSITIVE_CLOSURE:
                     result = a_statement
@@ -185,6 +186,11 @@ class AbstractShexingStrategy(object):
             if a_statement.cardinality != result.cardinality:
                 result.add_comment(self._turn_statement_into_comment(a_statement, self._namespaces_dict))
         return result
+
+    @staticmethod
+    def _has_several_exact_cardinalities(mergeable_constraints):
+        return len([a_statement for a_statement in mergeable_constraints.constraints()
+                    if a_statement.cardinality != POSITIVE_CLOSURE]) > 1
 
     def _is_a_group_of_statements_with_useless_positive_closure(self, list_of_candidate_sentences):  # todo during refactor
         if len(list_of_candidate_sentences) != 2:
