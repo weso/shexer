@@ -1,5 +1,5 @@
 from shexer.model.statement import POSITIVE_CLOSURE, KLEENE_CLOSURE, OPT_CARDINALITY
-from shexer.model.const_elem_types import NONLITERAL_ELEM_TYPE, BNODE_ELEM_TYPE, IRI_ELEM_TYPE
+from shexer.model.const_elem_types import NONLITERAL_ELEM_TYPE, BNODE_ELEM_TYPE, IRI_ELEM_TYPE, UNSHAPED_ELEM_TYPE
 from shexer.model.fixed_prop_choice_statement import FixedPropChoiceStatement
 from shexer.model.statement import Statement
 from shexer.io.shex.formater.statement_serializers.st_serializers_factory import StSerializerFactory
@@ -10,6 +10,7 @@ from shexer.model.shape import STARTING_CHAR_FOR_SHAPE_NAME
 
 _DIRECT_ST_SERIALIZER = 0
 _INVERSE_ST_SERIALIZER = 1
+_NODE_KIND_COUNTERS = (NONLITERAL_ELEM_TYPE, UNSHAPED_ELEM_TYPE)
 
 
 class AbstractShexingStrategy(object):
@@ -84,9 +85,19 @@ class AbstractShexingStrategy(object):
         for a_statement in original_statements:  # TODO Refactor!!! This is not the place to set the serializer
             self._set_serializer_object_for_statements(a_statement)
 
+        histograms = self._cardinality_histograms(original_statements)
         result = self._group_constraints_with_same_prop_and_obj(original_statements)
-        result = self._group_node_constraints(result)
+        result = self._group_node_constraints(result, histograms)
 
+        return result
+
+    @staticmethod
+    def _cardinality_histograms(statements):
+        result = {}
+        for a_statement in statements:
+            if type(a_statement.cardinality) == int:
+                key = (a_statement.st_property, a_statement.is_inverse, a_statement.st_type)
+                result.setdefault(key, {})[a_statement.cardinality] = a_statement.n_occurences
         return result
 
     def _compute_frequency(self, number_of_instances, n_ocurrences_statement):
@@ -194,11 +205,16 @@ class AbstractShexingStrategy(object):
                 return a_statement
         raise ValueError("The received group does not contain any statement with positive closure")
 
-    def _group_node_constraints(self, candidate_statements):
+    def _group_node_constraints(self, candidate_statements, histograms):
+        node_kind_counters = {(a_statement.st_property, a_statement.is_inverse, a_statement.st_type): a_statement
+                              for a_statement in candidate_statements
+                              if a_statement.st_type in _NODE_KIND_COUNTERS}
         result = []
         already_visited = set()
         for i in range(0, len(candidate_statements)):
             a_statement = candidate_statements[i]
+            if a_statement.st_type in _NODE_KIND_COUNTERS:
+                continue
             if a_statement.st_property == self._instantiation_property_str or self._is_a_literal(a_statement.st_type):
                 result.append(a_statement)
                 already_visited.add(a_statement)
@@ -207,7 +223,9 @@ class AbstractShexingStrategy(object):
                     already_visited.add(a_statement)
                     group_to_decide = MergeableConstraints(initial_constraint=a_statement,
                                                            statement_serializer_factory=self._statement_serializer_factory,
-                                                           namespaces_dict=self._namespaces_dict)
+                                                           namespaces_dict=self._namespaces_dict,
+                                                           histograms=histograms,
+                                                           node_kind_counters=node_kind_counters)
 
                     result.append(self._find_and_merge_potentially_swapped_constraints(
                         mergeable_constraints=group_to_decide,
@@ -283,16 +301,20 @@ class MergeableConstraints(object):
     """
     Internal class used to handle constraints created during the voting process that should be merged into a single one.
     """
-    def __init__(self, initial_constraint=None, statement_serializer_factory=None, namespaces_dict=None):
+    def __init__(self, initial_constraint=None, statement_serializer_factory=None, namespaces_dict=None,
+                 histograms=None, node_kind_counters=None):
         self._constraints = []
         self._bnode_constraint = None
         self._shape_constraints = None
         self._iri_constraint = None
         self._dominant_constraint = None
+        self._dominant_is_shape = False
         self._disable_or = True
         self._redundant_or_enabled = False
         self._statement_serializer_factory = statement_serializer_factory
         self._namespaces_dict = namespaces_dict
+        self._histograms = {} if histograms is None else histograms
+        self._node_kind_counters = {} if node_kind_counters is None else node_kind_counters
         if initial_constraint is not None:
             self.add_constraint(initial_constraint)
 
@@ -339,43 +361,47 @@ class MergeableConstraints(object):
         self.sort()
         self._disable_or = disable_or
         self._redundant_or_enabled = redundant_or_allowed
-        if self.has_bnodes:
-            self._bnode_merging_strategy()
+        general_constraint = self._general_constraint()
+        if self._a_shape_can_replace(general_constraint):
+            self._dominant_constraint = self._shape_with_cardinality_of(self._shape_constraints[0], general_constraint)
+            self._dominant_is_shape = True
         else:
-            self._no_bnode_merging_strategy()
+            self._dominant_constraint = general_constraint
         self._merge_content_in_single_statement()
         return self._dominant_constraint
 
-    def _bnode_merging_strategy(self):
-        if self.has_iri_constraint:  # iri + bnod = shape
-            if len(self._shape_constraints) == 1 \
-                    and self._iri_constraint.n_occurences + self._bnode_constraint.n_occurences \
-                    == self._shape_constraints[0].n_occurences:
-                self._promote_to_dominant(self._shape_constraints[0])
-            else: # there are iri, bnode, and shape, not composed
-                self._add_dominant(Statement(st_property=self._bnode_constraint.st_property,
-                                             st_type=NONLITERAL_ELEM_TYPE,
-                                             n_occurences=self._bnode_constraint.n_occurences + self._iri_constraint.n_occurences,
-                                             is_inverse=self._bnode_constraint.is_inverse,
-                                             probability=self._bnode_constraint.probability + self._iri_constraint.probability,
-                                             cardinality=self._most_general_cardinality(self._bnode_constraint.cardinality,
-                                                                                        self._iri_constraint.cardinality),
-                                             serializer_object=self._statement_serializer_factory.get_base_serializer(is_inverse=self._bnode_constraint.is_inverse)
-                                             ))
-        elif len(self._shape_constraints) != 0 \
-                and self._shape_constraints[0].n_occurences == self._bnode_constraint.n_occurences:
-                # Case of at least a shape being used exactyl as many times as BNODE
-            self._promote_to_dominant(self._shape_constraints[0])
-        else:  # No IRI and no shape is used enough, BNODE should subsume everything.
-            self._promote_to_dominant(self._bnode_constraint)
+    def _general_constraint(self):
+        if self._bnode_constraint is None:
+            return self._iri_constraint
+        if self._iri_constraint is None:
+            return self._bnode_constraint
+        return self._node_kind_counters[self._key(NONLITERAL_ELEM_TYPE)]
 
+    def _a_shape_can_replace(self, general_constraint):
+        if not self.has_shape_constraints \
+                or self._shape_constraints[0].n_occurences < general_constraint.n_occurences:
+            return False
+        if self._histogram(self._shape_constraints[0].st_type) == self._histogram(general_constraint.st_type):
+            return True
+        return not self._disable_or and self._key(UNSHAPED_ELEM_TYPE) not in self._histograms
 
+    def _histogram(self, st_type):
+        return self._histograms.get(self._key(st_type))
 
-    def _no_bnode_merging_strategy(self):
-        if len(self._shape_constraints) == 0 or self._shape_constraints[0].n_occurences < self._iri_constraint.n_occurences:
-            self._promote_to_dominant(self._iri_constraint)
-        else:
-            self._promote_to_dominant(self._shape_constraints[0])
+    def _key(self, st_type):
+        a_constraint = self._constraints[0]
+        return a_constraint.st_property, a_constraint.is_inverse, st_type
+
+    @staticmethod
+    def _shape_with_cardinality_of(shape_constraint, general_constraint):
+        return Statement(st_property=shape_constraint.st_property,
+                         st_type=shape_constraint.st_type,
+                         cardinality=general_constraint.cardinality,
+                         n_occurences=general_constraint.n_occurences,
+                         probability=general_constraint.probability,
+                         comments=list(shape_constraint.comments),
+                         serializer_object=shape_constraint.serializer_object,
+                         is_inverse=shape_constraint.is_inverse)
 
     def _merge_content_in_single_statement(self):
         self._tune_dominant_constraint_wrt_or_config()
@@ -392,8 +418,8 @@ class MergeableConstraints(object):
                     AbstractShexingStrategy._turn_statement_into_comment(self._iri_constraint,
                                                                          self._namespaces_dict)
                 )
-        for a_constraint in self._shape_constraints:
-            if self._dominant_constraint != a_constraint:
+        for a_constraint in self._shape_constraints or []:
+            if not self._dominant_is_shape or a_constraint is not self._shape_constraints[0]:
                 self._dominant_constraint.add_comment(
                     AbstractShexingStrategy._turn_statement_into_comment(a_constraint,
                                                                          self._namespaces_dict)
@@ -401,52 +427,21 @@ class MergeableConstraints(object):
 
     def _tune_dominant_constraint_wrt_or_config(self):
         if self._disable_or:
-            if self._dominant_constraint.st_type not in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE] \
-                    and len(self._shape_constraints) > 0 \
-                    and self._shape_constraints[0].n_occurences == self._dominant_constraint:
-                if self._iri_constraint is not None:
-                    self._promote_to_dominant(self._iri_constraint)
-                else:  # It must be a BNODE
-                    self._promote_to_dominant(self._bnode_constraint)
-        else:  # or allowed
-            st_types = []
-            if self._redundant_or_enabled:
-                if self._dominant_constraint not in self._shape_constraints:
-                    st_types.append(self._dominant_constraint.st_type)
-                st_types = st_types + [a_constraint.st_type for a_constraint in self._shape_constraints]
-            elif not self._redundant_or_enabled and self._dominant_constraint in self._shape_constraints:
-                st_types = st_types + [a_constraint.st_type for a_constraint in self._shape_constraints]
-            if len(st_types) > 1:
-                self._dominant_constraint = FixedPropChoiceStatement(
-                    st_property=self._dominant_constraint.st_property,
-                    st_types=st_types,
-                    cardinality=self._dominant_constraint.cardinality,
-                    probability=self._dominant_constraint.probability,
-                    n_occurences=self._dominant_constraint.n_occurences,
-                    serializer_object=self._statement_serializer_factory.get_choice_serializer(
-                        is_inverse=self._dominant_constraint.is_inverse
-                    ),
-                    is_inverse=self._dominant_constraint.is_inverse)
-
-
-
-
-
-    def _most_general_cardinality(self, a_card1, a_card2):
-        if POSITIVE_CLOSURE in (a_card1, a_card2) or a_card1 != a_card2:
-            return POSITIVE_CLOSURE
-        else:
-            return a_card1
-    def _add_dominant(self, statement):
-        self._dominant_constraint = statement
-
-    def _promote_to_dominant(self, statement):
-        self._dominant_constraint = statement
-        self._constraints.remove(statement)
-
-    def _demote_dominant_to_plain(self):
-        if self._dominant_constraint.st_type not in [IRI_ELEM_TYPE, BNODE_ELEM_TYPE, NONLITERAL_ELEM_TYPE]:
-            self.add_constraint(self._dominant_constraint)
-            self.sort()
-        self._dominant_constraint = None
+            return
+        st_types = []
+        if self._redundant_or_enabled and not self._dominant_is_shape:
+            st_types.append(self._dominant_constraint.st_type)
+        if self._redundant_or_enabled or self._dominant_is_shape:
+            st_types = st_types + [a_constraint.st_type for a_constraint in self._shape_constraints or []]
+        if len(st_types) > 1:
+            self._dominant_constraint = FixedPropChoiceStatement(
+                st_property=self._dominant_constraint.st_property,
+                st_types=st_types,
+                cardinality=self._dominant_constraint.cardinality,
+                probability=self._dominant_constraint.probability,
+                n_occurences=self._dominant_constraint.n_occurences,
+                serializer_object=self._statement_serializer_factory.get_choice_serializer(
+                    is_inverse=self._dominant_constraint.is_inverse
+                ),
+                is_inverse=self._dominant_constraint.is_inverse)
 
