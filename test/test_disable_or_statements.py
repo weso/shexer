@@ -17,8 +17,7 @@ class TestDisableOrStatements(unittest.TestCase):
                         disable_comments=True,
                         disable_or_statements=False)
         str_result = shaper.shex_graph(string_output=True)
-        # In case the choice includes the IRI macro, then no OR should appear
-        self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "or_disabled.shex",
+        self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "or_enabled_useful_IRI.shex",
                                                       str_target=str_result,
                                                       or_shapes=True))
 
@@ -30,7 +29,6 @@ class TestDisableOrStatements(unittest.TestCase):
                         disable_comments=True,
                         disable_or_statements=False)
         str_result = shaper.shex_graph(string_output=True)
-        # In case the choice includes the IRI macro, then no OR should appear
         self.assertTrue(file_vs_str_tunned_comparison(file_path=_BASE_DIR + "or_enabled.shex",
                                                       str_target=str_result,
                                                       or_shapes=True))

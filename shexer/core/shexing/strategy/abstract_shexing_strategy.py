@@ -384,8 +384,7 @@ class MergeableConstraints(object):
         return self._node_kind_counters[self._key(NONLITERAL_ELEM_TYPE)]
 
     def _a_shape_can_replace(self, general_constraint):
-        if not self.has_shape_constraints \
-                or self._shape_constraints[0].n_occurences < general_constraint.n_occurences:
+        if not self.has_shape_constraints:
             return False
         if self._histogram(self._shape_constraints[0].st_type) == self._histogram(general_constraint.st_type):
             return True

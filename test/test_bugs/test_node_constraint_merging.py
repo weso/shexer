@@ -48,6 +48,15 @@ _:b1 ex:owns ex:rex .
 ex:jim ex:owns ex:fido .
 """
 
+_EVERY_OBJECT_TYPED = _PREFIXES + """
+ex:sarah a ex:Person ; ex:owns ex:rex .
+ex:jim a ex:Person ; ex:owns ex:tom .
+ex:ann a ex:Person ; ex:owns ex:fido .
+ex:rex a ex:Dog .
+ex:fido a ex:Dog .
+ex:tom a ex:Cat .
+"""
+
 _PERSON_TYPE = "rdf:type [ex:Person]"
 
 
@@ -109,3 +118,11 @@ class TestNodeConstraintMerging(unittest.TestCase):
     def test_inverse_iri_and_bnode_subjects(self):
         self.assertEqual(["^ ex:owns NONLITERAL +", "rdf:type [ex:Dog]"],
                          _shape_constraints("Dog", _IRI_AND_BNODE_SUBJECTS, inverse_paths=True))
+
+    def test_every_object_typed_but_no_class_dominant_or_disabled(self):
+        self.assertEqual(["ex:owns IRI", _PERSON_TYPE],
+                         _shape_constraints("Person", _EVERY_OBJECT_TYPED, disable_or_statements=True))
+
+    def test_every_object_typed_but_no_class_dominant_or_enabled(self):
+        self.assertEqual(["ex:owns @:Dog OR @:Cat", _PERSON_TYPE],
+                         _shape_constraints("Person", _EVERY_OBJECT_TYPED, disable_or_statements=False))
