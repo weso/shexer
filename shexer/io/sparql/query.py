@@ -15,21 +15,25 @@ _BINDINGS_KEY = "bindings"
 _VALUE_KEY = "value"
 _TYPE_KEY = "type"
 _URI_TYPE = "uri"
+_LITERAL_TYPES = ("literal", "typed-literal")
 
 _XML_LANG_FIELD = "xml:lang"
+_DATATYPE_FIELD = "datatype"
 
 
-def _add_lang_if_needed(result_dict):
-    result = result_dict[_VALUE_KEY]
-    if _XML_LANG_FIELD in result_dict:
-        result += '"' + result + '"@' + result_dict[_XML_LANG_FIELD]
-    return result
-
-
-def _add_corners_if_needed(target_elem, elem_type):
-    if elem_type == _URI_TYPE and not target_elem.startswith("<"):
-        return "<" + target_elem + ">"
-    return target_elem
+def build_term(result_dict):
+    value = result_dict[_VALUE_KEY]
+    elem_type = result_dict[_TYPE_KEY]
+    if elem_type == _URI_TYPE:
+        return value if value.startswith("<") else "<" + value + ">"
+    if elem_type in _LITERAL_TYPES:
+        quoted = '"' + value.replace('\\', '\\\\').replace('"', '\\"') + '"'
+        if _XML_LANG_FIELD in result_dict:
+            return quoted + "@" + result_dict[_XML_LANG_FIELD]
+        if _DATATYPE_FIELD in result_dict:
+            return quoted + "^^<" + result_dict[_DATATYPE_FIELD] + ">"
+        return quoted
+    return "_:" + value
 
 
 def query_endpoint_single_variable(endpoint_url, str_query, variable_id, max_retries=10):
@@ -57,11 +61,7 @@ def query_endpoint_sp_of_an_o(endpoint_url, str_query, s_id, p_id, max_retries=5
                                                max_retries=max_retries)
     result = []
     for row in result_query[_RESULTS_KEY][_BINDINGS_KEY]:
-        p_value = _add_corners_if_needed(target_elem=row[p_id][_VALUE_KEY],
-                                         elem_type=row[p_id][_TYPE_KEY])
-        s_value = _add_corners_if_needed(target_elem=_add_lang_if_needed(row[s_id]),
-                                         elem_type=row[s_id][_TYPE_KEY])
-        result.append((s_value, p_value))
+        result.append((build_term(row[s_id]), build_term(row[p_id])))
     return result
 
 
@@ -73,11 +73,7 @@ def query_endpoint_po_of_an_s(endpoint_url, str_query, p_id, o_id, max_retries=5
     result = []
     for row in result_query[_RESULTS_KEY][_BINDINGS_KEY]:
         if p_id in row and o_id in row:
-            p_value = _add_corners_if_needed(target_elem=row[p_id][_VALUE_KEY],
-                                             elem_type=row[p_id][_TYPE_KEY])
-            o_value = _add_corners_if_needed(target_elem=_add_lang_if_needed(row[o_id]),
-                                             elem_type=row[o_id][_TYPE_KEY])
-            result.append((p_value, o_value))
+            result.append((build_term(row[p_id]), build_term(row[o_id])))
     return result
 
 

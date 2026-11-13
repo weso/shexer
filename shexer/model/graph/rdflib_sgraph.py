@@ -1,12 +1,8 @@
-from rdflib import URIRef, Graph, Literal, BNode
+from rdflib import URIRef, Graph
+from rdflib.util import from_n3
 from shexer.model.graph.abstract_sgraph import SGraph
-from shexer.utils.triple_yielders import tune_token, tune_prop, tune_subj
 from shexer.utils.uri import add_corners_if_it_is_an_uri, remove_corners
 from shexer.core.instances.pconsts import _S, _P, _O
-from shexer.model.IRI import IRI as ModelIRI
-from shexer.model.property import Property as ModelProperty
-from shexer.model.Literal import Literal as ModelLiteral
-from shexer.model.bnode import BNode as ModelBnode
 from shexer.consts import RDF_TYPE
 
 
@@ -39,18 +35,14 @@ class RdflibSgraph(SGraph):
                                                                          raise_error_if_no_corners=False)),
                                                    None,
                                                    None)):
-            yield self._add_URI_corners_if_needed(s),\
-                  self._add_URI_corners_if_needed(p),\
-                  self._add_URI_corners_if_needed(self._add_lang_if_needed(o))
+            yield s.n3(), p.n3(), o.n3()
 
     def yield_s_p_triples_of_an_o(self, target_node):
         for s, p, o in self._rdflib_graph.triples((None,
                                                    None,
                                                    URIRef(remove_corners(a_uri=target_node,
                                                                          raise_error_if_no_corners=False)))):
-            yield self._add_URI_corners_if_needed(s),\
-                  self._add_URI_corners_if_needed(p),\
-                  self._add_URI_corners_if_needed(o)
+            yield s.n3(), p.n3(), o.n3()
 
 
     def yield_class_triples_of_an_s(self, target_node, instantiation_property):
@@ -59,9 +51,7 @@ class RdflibSgraph(SGraph):
                                                    URIRef(remove_corners(a_uri=instantiation_property,
                                                                          raise_error_if_no_corners=False)),
                                                    None)):
-            yield self._add_URI_corners_if_needed(s),\
-                  self._add_URI_corners_if_needed(p),\
-                  self._add_URI_corners_if_needed(self._add_lang_if_needed(o))
+            yield s.n3(), p.n3(), o.n3()
 
     def add_triple(self, a_triple):
         """
@@ -70,16 +60,8 @@ class RdflibSgraph(SGraph):
         :return:
         """
 
-        subj = tune_subj(add_corners_if_it_is_an_uri(a_triple[_S]),
-                         raise_error_if_no_corners=False)
-        prop = tune_prop(add_corners_if_it_is_an_uri(a_triple[_P]),
-                         raise_error_if_no_corners=False)
-        obj = tune_token(add_corners_if_it_is_an_uri(a_triple[_O]),
-                         raise_error_if_no_corners=False)
-
-        self._rdflib_graph.add((self._turn_obj_into_rdflib_element(subj),
-                                self._turn_obj_into_rdflib_element(prop),
-                                self._turn_obj_into_rdflib_element(obj)))
+        self._rdflib_graph.add(tuple(from_n3(add_corners_if_it_is_an_uri(a_token))
+                                     for a_token in (a_triple[_S], a_triple[_P], a_triple[_O])))
 
     def yield_classes_with_instances(self, instantiation_property=RDF_TYPE):
         result = set()
@@ -92,18 +74,6 @@ class RdflibSgraph(SGraph):
             yield elem
 
 
-    def _turn_obj_into_rdflib_element(self, model_elem):
-        if type(model_elem) == ModelIRI or type(model_elem) == ModelProperty:
-            return URIRef(model_elem.iri)
-        elif type(model_elem) == ModelLiteral:
-            return Literal(lexical_or_value=str(model_elem),
-                           datatype=model_elem.elem_type)
-        elif type(model_elem) == ModelBnode:
-            return BNode(value=str(model_elem))
-        else:
-            raise ValueError("Unexpected type of element. " + str(model_elem) + ": " + str(type(model_elem)))
-
-
     def _build_rdflib_graph(self, source, raw_graph, format):
         result = Graph()
         if source is not None:
@@ -111,18 +81,3 @@ class RdflibSgraph(SGraph):
         else:
             result.parse(data=raw_graph, format=format)
         return result
-
-    def _add_lang_if_needed(self, rdflib_obj):
-        """
-        It returns a string representation with lang if it is a langString
-        :param rdflib_obj:
-        :return:
-        """
-        if type(rdflib_obj) == Literal and rdflib_obj.language is not None:
-           return '"' + str(rdflib_obj) + '"@' + rdflib_obj.language
-        return rdflib_obj
-
-    def _add_URI_corners_if_needed(self, rdflib_obj):
-        if type(rdflib_obj) == URIRef:
-            return "<"+ str(rdflib_obj) + ">"
-        return str(rdflib_obj)
